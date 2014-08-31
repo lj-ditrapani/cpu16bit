@@ -1,0 +1,143 @@
+16 x 2 x 16-bit colors
+(16 pairs of 16-bit colors)
+4 bit color pair index
+8x8 pixel tiles
+256 tile index
+60 x 40 chars/tiles
+480 x 320 pixel screen
+video RAM
+4,480 Words (<9KB)
+
+Same first opcode
+0 HLT
+0 LDR    RD <- M[RS]
+0 STR    M[RD] <- RS
+0 NOT    RD <- ! RS
+0 SPC    RD <- PC
+
+1 LDL    RD[07-00] <- immd8
+2 LDU    RD[15-08] <- immd8
+3 ADD    RD <- RS1 + RS2
+4 SUB    RD <- RS1 - RS2
+5 ADC    RD <- RS1 + RS2 + C
+6 SBB    RD <- RS1 + RS2 - B
+7 ADI    RD <- RS1 + immd4
+8 SBI    RD <- RS1 - immd4
+9 AND    RD <- RS1 and RS2
+A ORR    RD <- RS1 or RS2
+B XOR    RD <- RS1 xor RS2
+C ROT    RD <- RS1 rot by immd4
+D BRN    PC <- RD if RS matches NZPCV (if 0 -> overflow flag V)
+E
+F
+
+16 X 16-bit registers
+Have seperate PC so we can do more in
+parallel
+
+64 KWords = 128 KB
+20 MHz?
+10 Million instructions per second
+Run at 30-50 MHz?
+
+Triple ported register file
+(2 reads, 1 write per clock)
+CPLD like Control
+13 function ALU (4 control bits)
+
+
+        Mm Reg
+0 HLT    - --   000
+0 LDR    R RW   1RD
+0 STR    W R-   2RR
+0 NOT    - RW   3RD
+0 SPC    - RW   40D
+
+1 LDL    - -W   CCD
+2 LDU    - -W   CCD
+3 ADD    - RW   RRD
+4 SUB    - RW   RRD
+5 ADC    - RW   RRD
+6 SBB    - RW   RRD
+7 ADI    - RW   RRD
+8 SBI    - RW   RRD
+9 AND    - RW   RRD
+A ORR    - RW   RRD
+B XOR    - RW   RRD
+C ROT    - RW   ARD
+D BRN    - RW   SRR
+E
+F
+
+
+Reg (1 clock)
+Fetch instruction (memory read)       1 clock
+Decode & Reg read & ALU & Reg write
+
+STR (2 clocks)
+Fetch instruction (memory read)       1 clock
+Decode & Reg read
+Memory write		              1 clock
+
+LDR (2 clocks)
+Fetch instruction (memory read)       1 clock
+Decode & Reg read
+Memory read & reg write               1 clock
+
+
+Video Ram
+32 16bit colors   32    Words
+Single tile        8    Words   8 X 8 tile times 2 bits (16 bits per word)
+Tile index      2048    256 tiles X 8 words	
+Each tile cell     1    Word    8 bit tile select + 4 bit foreground color pair + 4 bit background color pair
+Number of cells 2400    60 X 40
+Total           4480    Words
+
+
+I/O
+10 Million instructions per second
+ 1 Million instructions per frame
+   100 K instructions for I/O per frame
+    10 K I/O operations per frame
+       5K video output
+       3K Network/HDD access
+       1.9K sound
+       100 operation for keyboard input?
+
+
+Video hardware
+--------------
+Instead of doing copy over to video RAM, could use double buffer
+So just swap buffers instead of doing copy; instantaneous!
+Could do the same for all I/O.
+
+First 90 ms of frame:  CPU controls RAM lines
+Next 10 ms of frame:  CPU sleeps
+    video chip controls RAM Address and data out lines
+Video copies video RAM into local video ram (4,480 words)
+Control returned to CPU
+Video ram draws info to screen in continuous loop for next 90 ms
+
+Video loop 1 (7 operations)
+------------
+1) Use row/col counters to load tile cell
+2) Use tile slot color pair IDs to load 4 colors from color pairs
+3) Use row/col counters and tile ID to load tile row
+4) increment row/col counters as necessary
+5) Switch buffers and goto 1)
+
+Video loop 2 (8 operations)
+------------
+1) Draw 8 pixel row to screen (16-bit row)
+2) Switch buffers Goto 1)
+
+153 k cycles to complete
+160 k * 6 = 960 k cycles
+1.8 million cycles available
+
+
+  200 Keyboard input
+4,480 Video out
+  408 Sound out
+2,048 Network I/O
+2,048 HDD I/O
