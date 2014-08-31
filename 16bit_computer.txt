@@ -10,35 +10,36 @@ video RAM
 
 Same first opcode
 0 HLT
-0 LDR    RD <- M[RS]
-0 STR    M[RD] <- RS
-0 NOT    RD <- ! RS
-0 SPC    RD <- PC
-
 1 LDL    RD[07-00] <- immd8
 2 LDU    RD[15-08] <- immd8
-3 ADD    RD <- RS1 + RS2
-4 SUB    RD <- RS1 - RS2
-5 ADC    RD <- RS1 + RS2 + C
-6 SBB    RD <- RS1 + RS2 - B
+3 LDR    RD <- M[R1]
+4 STR    M[R1] <- R2
+5 ADD    RD <- RS1 + RS2
+6 SUB    RD <- RS1 - RS2
 7 ADI    RD <- RS1 + immd4
 8 SBI    RD <- RS1 - immd4
 9 AND    RD <- RS1 and RS2
 A ORR    RD <- RS1 or RS2
 B XOR    RD <- RS1 xor RS2
-C ROT    RD <- RS1 rot by immd4
-D BRN    PC <- RD if RS matches NZPCV (if 0 -> overflow flag V)
-E
-F
+C NOT    RD <- ! R1
+D ROT    RD <- RS1 rot by immd4
+E BRN    PC <- R2 if R1 matches NZPCV
+F SPC    RD <- PC + 2
+
+BRN M---
+M is mode
+0NZP    0 is value mode (negative zero positive)
+10VC    1 is flag mode (overflow carry)
+0111    unconditional jump
+0000    no op
 
 16 X 16-bit registers
 Have seperate PC so we can do more in
 parallel
 
-64 KWords = 128 KB
-20 MHz?
+64 KWords = 128 KB = 1 M-bit
+20 MHz
 10 Million instructions per second
-Run at 30-50 MHz?
 
 Triple ported register file
 (2 reads, 1 write per clock)
@@ -46,28 +47,32 @@ CPLD like Control
 13 function ALU (4 control bits)
 
 
-        Mm Reg
-0 HLT    - --   000
-0 LDR    R RW   1RD
-0 STR    W R-   2RR
-0 NOT    - RW   3RD
-0 SPC    - RW   40D
+        Mm Reg  01 02 03
+0 HLT    - --    0  0  0
+1 LDL    - -W   UC UC RD
+2 LDU    - -W   UC UC RD
+3 LDR    R RW   RA  0 RD
+4 STR    W R-   RA RI  0
+5 ADD    - RW   R1 R2 RD
+6 SUB    - RW   R1 R2 RD
+7 ADI    - RW   R1 UC RD
+8 SBI    - RW   R1 UC RD
+9 AND    - RW   R1 R2 RD
+A ORR    - RW   R1 R2 RD
+B XOR    - RW   R1 R2 RD
+C NOT    - RW   R1  0 RD
+D ROT    - RW   R1 SC RD
+E BRN    - RW   RV RA cond
+F SPC    - RW    0  0 RD
 
-1 LDL    - -W   CCD
-2 LDU    - -W   CCD
-3 ADD    - RW   RRD
-4 SUB    - RW   RRD
-5 ADC    - RW   RRD
-6 SBB    - RW   RRD
-7 ADI    - RW   RRD
-8 SBI    - RW   RRD
-9 AND    - RW   RRD
-A ORR    - RW   RRD
-B XOR    - RW   RRD
-C ROT    - RW   ARD
-D BRN    - RW   SRR
-E
-F
+
+Nibble 00:  op code
+Nibble 01:  0, high nibble of 8-bit const, Memory address register,
+            ALU input 1 register
+Nibble 02:  0, low nibble of 8-bit const, Memory data in register,
+            ALU input 2 register, unsigned const, signed const,
+            PC address register
+Nibble 03:  0, cond, destination register to WRITE to
 
 
 Reg (1 clock)
@@ -77,7 +82,7 @@ Decode & Reg read & ALU & Reg write
 STR (2 clocks)
 Fetch instruction (memory read)       1 clock
 Decode & Reg read
-Memory write		              1 clock
+Memory write                          1 clock
 
 LDR (2 clocks)
 Fetch instruction (memory read)       1 clock
@@ -88,8 +93,9 @@ Memory read & reg write               1 clock
 Video Ram
 32 16bit colors   32    Words
 Single tile        8    Words   8 X 8 tile times 2 bits (16 bits per word)
-Tile index      2048    256 tiles X 8 words	
-Each tile cell     1    Word    8 bit tile select + 4 bit foreground color pair + 4 bit background color pair
+Tile index      2048    Words   256 tiles X 8 words
+Each tile cell     1    Word    8 bit tile select +
+        4 bit foreground color pair + 4 bit background color pair
 Number of cells 2400    60 X 40
 Total           4480    Words
 
@@ -99,10 +105,13 @@ I/O
  1 Million instructions per frame
    100 K instructions for I/O per frame
     10 K I/O operations per frame
-       5K video output
-       3K Network/HDD access
-       1.9K sound
-       100 operation for keyboard input?
+       4,480 video output
+       500 sound (20 changes of 20 registers)
+       5K Network/HDD access (1K each read, 1K each write?)
+       10 operation for keyboard input (10 key down, 10 key up)
+                1 byte per action: first bit up or down,
+                                   next seven = key code
+                Saves up to 20 actions, anymore are dumped
 
 
 Video hardware
@@ -136,8 +145,9 @@ Video loop 2 (8 operations)
 1.8 million cycles available
 
 
-  200 Keyboard input
+Words
+   10 Keyboard input (20 actions per frame/200 actions per second)
 4,480 Video out
-  408 Sound out
-2,048 Network I/O
-2,048 HDD I/O
+  510 Sound out
+2,048 Network I/O (1K read, 1K write)
+2,048 HDD I/O (1K read, 1K write)
