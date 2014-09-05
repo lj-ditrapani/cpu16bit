@@ -1,3 +1,4 @@
+---------|---------|---------|---------|---------|---------|---------|--
 16 x 2 x 16-bit colors
 (16 pairs of 16-bit colors)
 4 bit color pair index
@@ -8,11 +9,10 @@
 video RAM
 4,480 Words (<9KB)
 
-Same first opcode
 0 HLT
-1 LDL    RD[07-00] <- immd8
-2 LDU    RD[15-08] <- immd8
-3 LDR    RD <- M[R1]
+1 LBY    RD[07-00] <- immd8
+2 HBY    RD[15-08] <- immd8
+3 LOD    RD <- M[R1]
 4 STR    M[R1] <- R2
 5 ADD    RD <- RS1 + RS2
 6 SUB    RD <- RS1 - RS2
@@ -49,9 +49,9 @@ CPLD like Control
 
         Mm Reg  01 02 03
 0 HLT    - --    0  0  0
-1 LDL    - -W   UC UC RD
-2 LDU    - -W   UC UC RD
-3 LDR    R RW   RA  0 RD
+1 LBY    - -W   UC UC RD
+2 HBY    - -W   UC UC RD
+3 LOD    R RW   RA  0 RD
 4 STR    W R-   RA RI  0
 5 ADD    - RW   R1 R2 RD
 6 SUB    - RW   R1 R2 RD
@@ -62,7 +62,7 @@ A ORR    - RW   R1 R2 RD
 B XOR    - RW   R1 R2 RD
 C NOT    - RW   R1  0 RD
 D ROT    - RW   R1 SC RD
-E BRN    - RW   RV RA cond
+E BRN    - RP   RV RA cond
 F SPC    - RW    0  0 RD
 
 
@@ -73,6 +73,24 @@ Nibble 02:  0, low nibble of 8-bit const, Memory data in register,
             ALU input 2 register, unsigned const, signed const,
             PC address register
 Nibble 03:  0, cond, destination register to WRITE to
+
+
+0 HLT    Halt
+1 LBY    Low byte
+2 HBY    High byte
+3 LOD    Load
+4 STR    Store
+5 ADD    
+6 SUB    
+7 ADI    Add 4-bit immediate
+8 SBI    Subtract 4-bit immediate
+9 AND    
+A ORR    
+B XOR    
+C NOT    
+D ROT    Rotate
+E BRN    Branch
+F SPC    Save PC
 
 
 Reg (1 clock)
