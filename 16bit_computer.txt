@@ -52,7 +52,7 @@ CPLD like Control
 1 LBY    - -W   UC UC RD
 2 HBY    - -W   UC UC RD
 3 LOD    R RW   RA  0 RD
-4 STR    W R-   RA RI  0
+4 STR    W R-   RA R2  0
 5 ADD    - RW   R1 R2 RD
 6 SUB    - RW   R1 R2 RD
 7 ADI    - RW   R1 UC RD
@@ -62,14 +62,14 @@ A ORR    - RW   R1 R2 RD
 B XOR    - RW   R1 R2 RD
 C NOT    - RW   R1  0 RD
 D ROT    - RW   R1 SC RD
-E BRN    - RP   RV RA cond
+E BRN    - RP   RV RP cond
 F SPC    - RW    0  0 RD
 
 
 Nibble 00:  op code
 Nibble 01:  0, high nibble of 8-bit const, Memory address register,
             ALU input 1 register
-Nibble 02:  0, low nibble of 8-bit const, Memory data in register,
+Nibble 02:  0, low nibble of 8-bit const, data in register to STR DI,
             ALU input 2 register, unsigned const, signed const,
             PC address register
 Nibble 03:  0, cond, destination register to WRITE to
@@ -110,7 +110,8 @@ Memory read & reg write               1 clock
 
 Video Ram
 32 16bit colors   32    Words
-Single tile        8    Words   8 X 8 tile times 2 bits (16 bits per word)
+Single tile        8    Words   8 X 8 tile times 2 bits
+                                (16 bits per word)
 Tile index      2048    Words   256 tiles X 8 words
 Each tile cell     1    Word    8 bit tile select +
         4 bit foreground color pair + 4 bit background color pair
@@ -168,4 +169,15 @@ Words
 4,480 Video out
   510 Sound out
 2,048 Network I/O (1K read, 1K write)
-2,048 HDD I/O (1K read, 1K write)
+2,048 HDD or SD card I/O (1K read, 1K write)
+  256 Sprite attribute data
+
+Sprites
+128 sprites
+2 words per sprite
+256 words
+Sprite data
+position    color pairs    Mirrors    Tile  |  Total
+x    y      1    2         x   y            |
+6    6      4    4         1   1      8     |  30
+30 bits < 2 words
