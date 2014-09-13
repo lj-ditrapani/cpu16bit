@@ -1,4 +1,6 @@
 ---------|---------|---------|---------|---------|---------|---------|--
+http://jsfiddle.net/bL2eszp8/5/
+
 16 x 2 x 16-bit colors
 (16 pairs of 16-bit colors)
 4 bit color pair index
@@ -8,6 +10,8 @@
 480 x 320 pixel screen
 video RAM
 4,480 Words (<9KB)
+ +256 sprite attribute data for 128 sprites
+ +300 (flip x, y grid cell tile)
 
 0 HLT
 1 LBY    RD[07-00] <- immd8
