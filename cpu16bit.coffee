@@ -21,6 +21,12 @@ isPositive = (word) ->
 isNegative = (word) ->
   (word >> 15) == 1
 
+signed = (hex) ->
+  if hex < 8
+      hex
+  else
+      -((hex ^ 0xF) + 1)
+  
 hasOverflowedOnAdd = (a, b, sum) ->
   ((isNegative(a) and isNegative(b) and isPositive(sum)) or
    (isPositive(a) and isPositive(b) and isNegative(sum)))
@@ -115,9 +121,10 @@ class CPU
     value = if ammount < 0
       value >> Math.abs(ammount)
     else
-      value << ammount
+      (value << ammount) & 0xFFFF
     @registers[rd] = value
 
   ljd.cpu16bit =
     CPU: CPU
     getNibbles: getNibbles
+    signed: signed
