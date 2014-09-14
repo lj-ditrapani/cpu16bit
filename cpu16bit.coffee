@@ -15,21 +15,36 @@ getNibbles = (word) ->
   c = word & 0xF
   [opCode, a, b, c]
 
-isPositive = (word) ->
+isPositiveOrZero = (word) ->
   (word >> 15) == 0
 
 isNegative = (word) ->
   (word >> 15) == 1
+
+isTruePositive = (word) ->
+  isPositiveOrZero(word) and (word != 0)
 
 signed = (hex) ->
   if hex < 8
       hex
   else
       -((hex ^ 0xF) + 1)
+
+matchValue = (value, cond) ->
+  if ((cond & 0b100) == 0b100) and isNegative(value)
+    true
+  else if ((cond & 0b010) == 0b010) and (value == 0)
+    true
+  else if ((cond & 0b001) == 0b001) and isTruePositive(value)
+    true
+  else
+    false
+
+matchFlags = (value, cond) ->
   
 hasOverflowedOnAdd = (a, b, sum) ->
-  ((isNegative(a) and isNegative(b) and isPositive(sum)) or
-   (isPositive(a) and isPositive(b) and isNegative(sum)))
+  ((isNegative(a) and isNegative(b) and isPositiveOrZero(sum)) or
+   (isPositiveOrZero(a) and isPositiveOrZero(b) and isNegative(sum)))
 
 class CPU
 
@@ -124,7 +139,17 @@ class CPU
       (value << ammount) & 0xFFFF
     @registers[rd] = value
 
+  BRN: (r1, r2, cond) ->
+    [value, jumpAddr] = [@registers[r1], @registers[r2]]
+    takeJump = if cond >= 8
+      matchFlags(value, cond - 8)
+    else
+      matchValue(value, cond)
+    if takeJump then @pc = jumpAddr
+
   ljd.cpu16bit =
     CPU: CPU
     getNibbles: getNibbles
     signed: signed
+    matchValue: matchValue
+    matchFlags: matchFlags

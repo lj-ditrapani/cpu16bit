@@ -304,13 +304,83 @@ test 'ROT', ->
       result,
       "ROT #{a} by #{immd4} = #{result}"
 
+makeCondCode = (strCode) ->
+  code = 0
+  if ("V" in strCode) or ("C" in strCode)
+    code += 8
+    if "V" in strCode
+      code += 2
+    if "C" in strCode
+      code += 1
+  else
+    if "N" in strCode
+      code += 4
+    if "Z" in strCode
+      code += 2
+    if "P" in strCode
+      code += 1
+  code
+
+
+test 'makeCondCode', ->
+  tests = [
+    ["NZP", 0b0111]
+    ["ZP", 0b0011]
+    ["Z", 0b0010]
+    ["P", 0b0001]
+    ["VC", 0b1011]
+    ["C", 0b1001]
+    ["V", 0b1010]
+    ["", 0b0000]
+  ]
+  for [str, code] in tests
+    equal makeCondCode(str), code
+
+test 'matchValue', ->
+  tests = [
+    #  NZP
+    [0b000, 0xFFFF, false]
+    [0b111, 0xFFFF, true]
+    [0b011, 0xFFFF, false]
+    [0b100, 0xFFFF, true]
+    [0b100, 0x8000, true]
+    [0b110, 0x0000, true]
+    [0b101, 0x0000, false]
+    [0b010, 0x0000, true]
+    [0b001, 0x7FFF, true]
+    [0b110, 0x7FFF, false]
+    [0b101, 0x7FFF, true]
+  ]
+  for [cond, value, result] in tests
+    equal cpu16bit.matchValue(value, cond), result, "#{cond} #{value} #{result}"
+
+
+test 'matchFlags', ->
+
 test 'BRN value', ->
   tests = [
-    [0xFFFF, 0x00FF, "NZP", 0x0001]
-    []
+    [0xFFFF, 0x00FF, "",    false]
+    [0xFFFF, 0x00FF, "NZP", true]
+    [0xFFFF, 0x00FF, "ZP",  false]
+    [0xFFFF, 0x00FF, "N",   true]
+    [0x8000, 0x00FF, "N",   true]
+    [0x0000, 0x00FF, "NZ",  true]
+    [0x0000, 0x00FF, "NP",  false]
+    [0x0000, 0x00FF, "Z",   true]
+    [0x7FFF, 0x00FF, "P",   true]
+    [0x7FFF, 0x00FF, "NZ",  false]
+    [0x7FFF, 0x00FF, "NP",  true]
   ]
-  for [value, jumpAddr, cond, finalAddr] in tests
+  for [value, jumpAddr, condString, takeJump] in tests
+    [r1, r2] = [12, 0]
     @cpu.pc = 0
+    @cpu.registers[r1] = value
+    @cpu.registers[r2] = jumpAddr
+    condCode = makeCondCode condString
+    @cpu.ram[0] = makeInstruction(14, r1, r2, condCode)
+    @cpu.step()
+    finalPC = if takeJump then jumpAddr else 0x0001
+    equal @cpu.pc, finalPC
 
 test 'BRN flag', ->
 
