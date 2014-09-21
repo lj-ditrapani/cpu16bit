@@ -1,0 +1,7 @@
+- Change ROT test to SHF test
+- Change ROT code to SHF code
+- Refactor
+    - Create new branch
+    - refactor tests
+    - refactor code
+- I/O memory map
