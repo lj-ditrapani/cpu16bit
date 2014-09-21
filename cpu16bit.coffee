@@ -147,9 +147,9 @@ class CPU
       matchValue(value, cond)
     if takeJump then @pc = jumpAddr
 
-  ljd.cpu16bit =
-    CPU: CPU
-    getNibbles: getNibbles
-    signed: signed
-    matchValue: matchValue
-    matchFlags: matchFlags
+ljd.cpu16bit =
+  CPU: CPU
+  getNibbles: getNibbles
+  signed: signed
+  matchValue: matchValue
+  matchFlags: matchFlags
