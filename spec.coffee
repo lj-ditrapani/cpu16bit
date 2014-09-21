@@ -283,26 +283,30 @@ test 'NOT', ->
     @cpu.step()
     equal @cpu.registers[rd], result, "NOT #{a} = #{result}"
 
-test 'ROT', ->
+test 'SHF', ->
   tests = [
-    [0x0704, 0x0, 0x0704]
-    [0x0704, 0x4, 0x7040]
-    [0x090F, 0x1, 0x121E]
-    [0x090F, 0x3, 0x4878]
-    [0x90F0, 0xC, 0x090F]
-    [0x90F1, 0xF, 0x4878]
-    [0x450A, 0x7, 0x8500]
-    [0x450A, 0x8, 0x0045]
+    [0x0704, 0, 0x4, 0x7040, 0]
+    [0x090F, 0, 0x1, 0x121E, 0]
+    [0x090F, 0, 0x3, 0x4878, 0]
+    [0x90F0, 1, 0x4, 0x090F, 0]
+    [0x90F1, 1, 0x1, 0x4878, 1]
+    [0x450A, 0, 0x7, 0x8500, 0]
+    [0x450A, 0, 0x8, 0x0A00, 1]
+    [0x450A, 1, 0x8, 0x0045, 0]
   ]
-  for [a, immd4, result] in tests
+  for [a, direction, ammount, result, carry] in tests
     [r1, rd] = [14, 7]
     @cpu.pc = 0
+    @cpu.carry = 0
     @cpu.registers[r1] = a
+    immd4 = direction * 8 + (ammount - 1)
     @cpu.ram[0] = makeInstruction(13, r1, immd4, rd)
     @cpu.step()
+    sDirection = if direction then "right" else "left"
     equal @cpu.registers[rd],
       result,
-      "ROT #{a} by #{immd4} = #{result}"
+      "SHF #{a} #{sDirection} by #{ammount} = #{result}"
+    equal @cpu.carry, carry
 
 makeCondCode = (strCode) ->
   code = 0

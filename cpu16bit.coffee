@@ -51,7 +51,7 @@ class CPU
   constructor: ->
     @reset()
     @opCodes = ('HLT LBY HBY LOD STR ADD SUB ADI SBI AND' +
-                 ' ORR XOR NOT ROT BRN SPC').split(' ')
+                 ' ORR XOR NOT SHF BRN SPC').split(' ')
 
   reset: ->
     @pc = 0
@@ -130,11 +130,12 @@ class CPU
     a = @registers[r1]
     @registers[rd] = a ^ 0xFFFF
 
-  ROT: (r1, immd, rd) ->
-    ammount = signed(immd)
+  SHF: (r1, immd, rd) ->
+    direction = if immd >= 8 then 'right' else 'left'
+    ammount = (immd & 7) + 1
     value = @registers[r1]
-    value = if ammount < 0
-      value >> Math.abs(ammount)
+    value = if direction == 'right'
+      value >> ammount
     else
       (value << ammount) & 0xFFFF
     @registers[rd] = value

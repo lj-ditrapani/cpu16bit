@@ -1,7 +1,9 @@
-- Change ROT test to SHF test
 - Change ROT code to SHF code
+    - Add carry logic
+    - Delete signed function?  (no longer used)
 - Refactor
     - Create new branch
-    - refactor tests
+    - refactor test
     - refactor code
+- Run method
 - I/O memory map
