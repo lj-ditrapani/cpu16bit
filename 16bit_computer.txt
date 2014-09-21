@@ -1,5 +1,5 @@
 ---------|---------|---------|---------|---------|---------|---------|--
-http://jsfiddle.net/bL2eszp8/5/
+http://jsfiddle.net/bL2eszp8/6/
 
 16 x 2 x 16-bit colors
 (16 pairs of 16-bit colors)
@@ -9,9 +9,10 @@ http://jsfiddle.net/bL2eszp8/5/
 60 x 40 chars/tiles
 480 x 320 pixel screen
 video RAM
-4,480 Words (<9KB)
+4,480 Words (< 9KB)
  +256 sprite attribute data for 128 sprites
  +300 (flip x, y grid cell tile)
+5,036 Words (< 10,072B)
 
 0 HLT
 1 LBY    RD[07-00] <- immd8
@@ -26,9 +27,20 @@ video RAM
 A ORR    RD <- RS1 or RS2
 B XOR    RD <- RS1 xor RS2
 C NOT    RD <- ! R1
-D ROT    RD <- RS1 rot by immd4
+D SHF    RD <- RS1 shifted by immd4
 E BRN    PC <- R2 if R1 matches NZPCV
 F SPC    RD <- PC + 2
+
+SHF  Shift, zero fill
+Carry contains bit of last bit shifted out
+immd4
+DAAA
+D is direction:  0 left, 1 right
+AAA is (amount - 1)
+0-7  ->  1-8
+Assembly:
+SHF R3 L 2 RA ->  $D31A
+SHF R7 R 7 R0 ->  $D7E0
 
 BRN M---
 M is mode
@@ -65,7 +77,7 @@ CPLD like Control
 A ORR    - RW   R1 R2 RD
 B XOR    - RW   R1 R2 RD
 C NOT    - RW   R1  0 RD
-D ROT    - RW   R1 SC RD
+D SHF    - RW   R1 SC RD
 E BRN    - RP   RV RP cond
 F SPC    - RW    0  0 RD
 
@@ -92,7 +104,7 @@ Nibble 03:  0, cond, destination register to WRITE to
 A ORR    
 B XOR    
 C NOT    
-D ROT    Rotate
+D SHF    Shift
 E BRN    Branch
 F SPC    Save PC
 
