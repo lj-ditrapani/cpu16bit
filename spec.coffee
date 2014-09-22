@@ -470,4 +470,14 @@ test 'BRN flag', ->
           "#{overflow} #{carry} #{condString} #{takeJump}"
 
 test 'SPC', ->
-  tests = []
+  tests = [
+    [0, 0x0000]
+    [1, 0x00FF]
+    [15, 0x0F00]
+  ]
+  for [rd, pc] in tests
+    @cpu.pc = pc
+    @cpu.registers[rd] = 0
+    @cpu.ram[pc] = makeInstruction(15, 0, 0, rd)
+    @cpu.step()
+    equal @cpu.registers[rd], pc, "#{rd} #{pc}"

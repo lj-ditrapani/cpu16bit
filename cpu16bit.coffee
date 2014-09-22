@@ -164,6 +164,9 @@ class CPU
     else
       matchValue(value, cond)
     if takeJump then @pc = jumpAddr
+
+  SPC: (r1, _, rd) ->
+    @registers[rd] = @pc - 1
      
 
 ljd.cpu16bit =
