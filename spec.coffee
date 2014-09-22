@@ -76,6 +76,59 @@ test 'getShiftCarry', ->
   for [direction, amount, value, carry] in tests
     equal cpu16bit.getShiftCarry(value, direction, amount), carry
 
+makeCondCode = (strCode) ->
+  code = 0
+  if ("V" in strCode) or ("C" in strCode)
+    code += 8
+    if "V" in strCode
+      code += 2
+    if "C" in strCode
+      code += 1
+  else
+    if "N" in strCode
+      code += 4
+    if "Z" in strCode
+      code += 2
+    if "P" in strCode
+      code += 1
+  code
+
+test 'makeCondCode', ->
+  tests = [
+    ["NZP", 0b0111]
+    ["ZP", 0b0011]
+    ["Z", 0b0010]
+    ["P", 0b0001]
+    ["VC", 0b1011]
+    ["C", 0b1001]
+    ["V", 0b1010]
+    ["", 0b0000]
+  ]
+  for [str, code] in tests
+    equal makeCondCode(str), code
+
+test 'matchValue', ->
+  tests = [
+    #  NZP
+    [0b000, 0xFFFF, false]
+    [0b111, 0xFFFF, true]
+    [0b011, 0xFFFF, false]
+    [0b100, 0xFFFF, true]
+    [0b100, 0x8000, true]
+    [0b110, 0x0000, true]
+    [0b101, 0x0000, false]
+    [0b010, 0x0000, true]
+    [0b001, 0x7FFF, true]
+    [0b110, 0x7FFF, false]
+    [0b101, 0x7FFF, true]
+  ]
+  for [cond, value, result] in tests
+    equal cpu16bit.matchValue(value, cond),
+          result,
+          "#{cond} #{value} #{result}"
+
+test 'matchFlags', ->
+
 module "cpu 16-bit",
   setup: ->
     @cpu = new cpu16bit.CPU
@@ -334,61 +387,6 @@ test 'SHF', ->
       result,
       "SHF #{a} #{sDirection} by #{amount} = #{result}"
     equal @cpu.carry, carry
-
-makeCondCode = (strCode) ->
-  code = 0
-  if ("V" in strCode) or ("C" in strCode)
-    code += 8
-    if "V" in strCode
-      code += 2
-    if "C" in strCode
-      code += 1
-  else
-    if "N" in strCode
-      code += 4
-    if "Z" in strCode
-      code += 2
-    if "P" in strCode
-      code += 1
-  code
-
-
-test 'makeCondCode', ->
-  tests = [
-    ["NZP", 0b0111]
-    ["ZP", 0b0011]
-    ["Z", 0b0010]
-    ["P", 0b0001]
-    ["VC", 0b1011]
-    ["C", 0b1001]
-    ["V", 0b1010]
-    ["", 0b0000]
-  ]
-  for [str, code] in tests
-    equal makeCondCode(str), code
-
-test 'matchValue', ->
-  tests = [
-    #  NZP
-    [0b000, 0xFFFF, false]
-    [0b111, 0xFFFF, true]
-    [0b011, 0xFFFF, false]
-    [0b100, 0xFFFF, true]
-    [0b100, 0x8000, true]
-    [0b110, 0x0000, true]
-    [0b101, 0x0000, false]
-    [0b010, 0x0000, true]
-    [0b001, 0x7FFF, true]
-    [0b110, 0x7FFF, false]
-    [0b101, 0x7FFF, true]
-  ]
-  for [cond, value, result] in tests
-    equal cpu16bit.matchValue(value, cond),
-          result,
-          "#{cond} #{value} #{result}"
-
-
-test 'matchFlags', ->
 
 test 'BRN value', ->
   tests = [
