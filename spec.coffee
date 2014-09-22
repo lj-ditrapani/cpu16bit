@@ -37,6 +37,45 @@ test 'getNibbles', ->
   deepEqual cpu16bit.getNibbles(0xABCD), [0xA, 0xB, 0xC, 0xD]
   deepEqual cpu16bit.getNibbles(0x7712), [0x7, 0x7, 0x1, 0x2]
 
+test 'positionOfLastBitShifted', ->
+  tests = [
+    ['left', 1, 15]
+    ['right', 1, 0]
+    ['left', 4, 12]
+    ['right', 4, 3]
+    ['left', 8, 8]
+    ['right', 8, 7]
+  ]
+  for [direction, amount, position] in tests
+    equal cpu16bit.positionOfLastBitShifted(direction, amount), position
+
+test 'oneBitWordMask', ->
+  tests = [
+    [0, 0x0001]
+    [1, 0x0002]
+    [3, 0x0008]
+    [4, 0x0010]
+    [8, 0x0100]
+    [15, 0x8000]
+    [14, 0x4000]
+  ]
+  for [position, mask] in tests
+    equal cpu16bit.oneBitWordMask(position), mask
+
+test 'getShiftCarry', ->
+  tests = [
+    ['left', 1, 0x8000, 1]
+    ['left', 1, 0x7FFF, 0]
+    ['right', 1, 0x0001, 1]
+    ['right', 1, 0xFFFE, 0]
+    ['left', 4, 0x1000, 1]
+    ['right', 4, 0xFFF7, 0]
+    ['left', 8, 0xFEFF, 0]
+    ['right', 8, 0x0080, 1]
+  ]
+  for [direction, amount, value, carry] in tests
+    equal cpu16bit.getShiftCarry(value, direction, amount), carry
+
 module "cpu 16-bit",
   setup: ->
     @cpu = new cpu16bit.CPU

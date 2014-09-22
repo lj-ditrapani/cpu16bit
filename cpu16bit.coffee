@@ -23,6 +23,24 @@ isNegative = (word) ->
 
 isTruePositive = (word) ->
   isPositiveOrZero(word) and (word != 0)
+  
+hasOverflowedOnAdd = (a, b, sum) ->
+  ((isNegative(a) and isNegative(b) and isPositiveOrZero(sum)) or
+   (isPositiveOrZero(a) and isPositiveOrZero(b) and isNegative(sum)))
+
+positionOfLastBitShifted = (direction, amount) ->
+  if direction == 'right'
+    amount - 1
+  else
+    16 - amount
+
+oneBitWordMask = (position) ->
+  Math.pow(2, position)
+
+getShiftCarry = (value, direction, amount) ->
+  position = positionOfLastBitShifted(direction, amount)
+  mask = oneBitWordMask(position)
+  if (value & mask) > 0 then 1 else 0
 
 matchValue = (value, cond) ->
   if ((cond & 0b100) == 0b100) and isNegative(value)
@@ -35,10 +53,6 @@ matchValue = (value, cond) ->
     false
 
 matchFlags = (value, cond) ->
-  
-hasOverflowedOnAdd = (a, b, sum) ->
-  ((isNegative(a) and isNegative(b) and isPositiveOrZero(sum)) or
-   (isPositiveOrZero(a) and isPositiveOrZero(b) and isNegative(sum)))
 
 class CPU
 
@@ -145,5 +159,8 @@ class CPU
 ljd.cpu16bit =
   CPU: CPU
   getNibbles: getNibbles
+  positionOfLastBitShifted: positionOfLastBitShifted
+  oneBitWordMask: oneBitWordMask
+  getShiftCarry: getShiftCarry
   matchValue: matchValue
   matchFlags: matchFlags
