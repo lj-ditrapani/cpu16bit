@@ -1,9 +1,11 @@
-- Change ROT code to SHF code
-    - Add carry logic
-    - Delete signed function?  (no longer used)
+- Get coffeelint running
+- Ensure within 72 chars
+- Update readme with BRN details for 10VC
+- make HLT function
 - Refactor
     - Create new branch
     - refactor test
     - refactor code
 - Run method
+- Full assembly program tests
 - I/O memory map
