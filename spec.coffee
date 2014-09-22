@@ -37,18 +37,6 @@ test 'getNibbles', ->
   deepEqual cpu16bit.getNibbles(0xABCD), [0xA, 0xB, 0xC, 0xD]
   deepEqual cpu16bit.getNibbles(0x7712), [0x7, 0x7, 0x1, 0x2]
 
-test 'signed', ->
-  tests = [
-    [0x8, -8]
-    [0x0,  0]
-    [0x1,  1]
-    [0xF, -1]
-    [0xA, -6]
-    [0x7,  7]
-  ]
-  for [hex, value] in tests
-    equal cpu16bit.signed(hex), value
-
 module "cpu 16-bit",
   setup: ->
     @cpu = new cpu16bit.CPU

@@ -24,12 +24,6 @@ isNegative = (word) ->
 isTruePositive = (word) ->
   isPositiveOrZero(word) and (word != 0)
 
-signed = (hex) ->
-  if hex < 8
-      hex
-  else
-      -((hex ^ 0xF) + 1)
-
 matchValue = (value, cond) ->
   if ((cond & 0b100) == 0b100) and isNegative(value)
     true
@@ -151,6 +145,5 @@ class CPU
 ljd.cpu16bit =
   CPU: CPU
   getNibbles: getNibbles
-  signed: signed
   matchValue: matchValue
   matchFlags: matchFlags
