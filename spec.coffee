@@ -78,7 +78,7 @@ test 'getShiftCarry', ->
 
 makeCondCode = (strCode) ->
   code = 0
-  if ("V" in strCode) or ("C" in strCode)
+  if ("V" in strCode) or ("C" in strCode) or ("-" in strCode)
     code += 8
     if "V" in strCode
       code += 2
@@ -103,6 +103,7 @@ test 'makeCondCode', ->
     ["C", 0b1001]
     ["V", 0b1010]
     ["", 0b0000]
+    ["-", 0b1000]
   ]
   for [str, code] in tests
     equal makeCondCode(str), code
@@ -128,6 +129,28 @@ test 'matchValue', ->
           "#{cond} #{value} #{result}"
 
 test 'matchFlags', ->
+  tests = [
+    #  VC
+    [0b00, 0, 0, true]
+    [0b00, 1, 0, false]
+    [0b00, 0, 1, false]
+    [0b11, 0, 1, true]
+    [0b11, 1, 0, true]
+    [0b11, 1, 1, true]
+    [0b11, 0, 0, false]
+    [0b10, 0, 0, false]
+    [0b10, 0, 1, false]
+    [0b10, 1, 0, true]
+    [0b10, 1, 1, true]
+    [0b01, 0, 0, false]
+    [0b01, 0, 1, true]
+    [0b01, 1, 0, false]
+    [0b01, 1, 1, true]
+  ]
+  for [cond, overflow, carry, result] in tests
+    equal cpu16bit.matchFlags(overflow, carry, cond),
+          result,
+          "#{cond} #{overflow} #{carry} #{result}"
 
 module "cpu 16-bit",
   setup: ->
@@ -374,18 +397,18 @@ test 'SHF', ->
     [0x450A, 0, 0x8, 0x0A00, 1]
     [0x450A, 1, 0x8, 0x0045, 0]
   ]
-  for [a, direction, amount, result, carry] in tests
+  for [value, direction, amount, result, carry] in tests
     [r1, rd] = [14, 7]
     @cpu.pc = 0
     @cpu.carry = 0
-    @cpu.registers[r1] = a
+    @cpu.registers[r1] = value
     immd4 = direction * 8 + (amount - 1)
     @cpu.ram[0] = makeInstruction(13, r1, immd4, rd)
     @cpu.step()
     sDirection = if direction then "right" else "left"
     equal @cpu.registers[rd],
       result,
-      "SHF #{a} #{sDirection} by #{amount} = #{result}"
+      "SHF #{value} #{sDirection} by #{amount} = #{result}"
     equal @cpu.carry, carry
 
 test 'BRN value', ->

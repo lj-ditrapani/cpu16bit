@@ -52,7 +52,15 @@ matchValue = (value, cond) ->
   else
     false
 
-matchFlags = (value, cond) ->
+matchFlags = (overflow, carry, cond) ->
+  if (cond >= 2) and overflow
+    true
+  else if ((cond & 1) == 1) and carry
+    true
+  else if (cond == 0) and (not overflow) and (not carry)
+    true
+  else
+    false
 
 class CPU
 
@@ -142,6 +150,7 @@ class CPU
     direction = if immd >= 8 then 'right' else 'left'
     amount = (immd & 7) + 1
     value = @registers[r1]
+    @carry = getShiftCarry(value, direction, amount)
     value = if direction == 'right'
       value >> amount
     else
