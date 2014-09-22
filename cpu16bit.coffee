@@ -132,12 +132,12 @@ class CPU
 
   SHF: (r1, immd, rd) ->
     direction = if immd >= 8 then 'right' else 'left'
-    ammount = (immd & 7) + 1
+    amount = (immd & 7) + 1
     value = @registers[r1]
     value = if direction == 'right'
-      value >> ammount
+      value >> amount
     else
-      (value << ammount) & 0xFFFF
+      (value << amount) & 0xFFFF
     @registers[rd] = value
 
   BRN: (r1, r2, cond) ->

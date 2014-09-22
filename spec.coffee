@@ -294,18 +294,18 @@ test 'SHF', ->
     [0x450A, 0, 0x8, 0x0A00, 1]
     [0x450A, 1, 0x8, 0x0045, 0]
   ]
-  for [a, direction, ammount, result, carry] in tests
+  for [a, direction, amount, result, carry] in tests
     [r1, rd] = [14, 7]
     @cpu.pc = 0
     @cpu.carry = 0
     @cpu.registers[r1] = a
-    immd4 = direction * 8 + (ammount - 1)
+    immd4 = direction * 8 + (amount - 1)
     @cpu.ram[0] = makeInstruction(13, r1, immd4, rd)
     @cpu.step()
     sDirection = if direction then "right" else "left"
     equal @cpu.registers[rd],
       result,
-      "SHF #{a} #{sDirection} by #{ammount} = #{result}"
+      "SHF #{a} #{sDirection} by #{amount} = #{result}"
     equal @cpu.carry, carry
 
 makeCondCode = (strCode) ->
@@ -356,7 +356,9 @@ test 'matchValue', ->
     [0b101, 0x7FFF, true]
   ]
   for [cond, value, result] in tests
-    equal cpu16bit.matchValue(value, cond), result, "#{cond} #{value} #{result}"
+    equal cpu16bit.matchValue(value, cond),
+          result,
+          "#{cond} #{value} #{result}"
 
 
 test 'matchFlags', ->
