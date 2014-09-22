@@ -160,10 +160,11 @@ class CPU
   BRN: (r1, r2, cond) ->
     [value, jumpAddr] = [@registers[r1], @registers[r2]]
     takeJump = if cond >= 8
-      matchFlags(value, cond - 8)
+      matchFlags(@overflow, @carry, cond - 8)
     else
       matchValue(value, cond)
     if takeJump then @pc = jumpAddr
+     
 
 ljd.cpu16bit =
   CPU: CPU

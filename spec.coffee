@@ -437,6 +437,37 @@ test 'BRN value', ->
     equal @cpu.pc, finalPC
 
 test 'BRN flag', ->
+  tests = [
+    [0, 0, '-', true]
+    [1, 0, '-', false]
+    [0, 1, '-', false]
+    [0, 1, 'VC', true]
+    [1, 0, 'VC', true]
+    [1, 1, 'VC', true]
+    [0, 0, 'VC', false]
+    [0, 0, 'V', false]
+    [0, 1, 'V', false]
+    [1, 0, 'V', true]
+    [1, 1, 'V', true]
+    [0, 0, 'C', false]
+    [0, 1, 'C', true]
+    [1, 0, 'C', false]
+    [1, 1, 'C', true]
+  ]
+  for [overflow, carry, condString, takeJump] in tests
+    [r1, r2] = [11, 1]
+    jumpAddr = 0x00FF
+    @cpu.pc = 0
+    @cpu.overflow = overflow
+    @cpu.carry = carry
+    @cpu.registers[r2] = jumpAddr
+    condCode = makeCondCode condString
+    @cpu.ram[0] = makeInstruction(14, r1, r2, condCode)
+    @cpu.step()
+    finalPC = if takeJump then jumpAddr else 0x0001
+    equal @cpu.pc,
+          finalPC,
+          "#{overflow} #{carry} #{condString} #{takeJump}"
 
 test 'SPC', ->
   tests = []
