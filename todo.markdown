@@ -1,6 +1,10 @@
 - Get coffeelint running
 - Ensure within 72 chars
 - Update readme with BRN details for 10VC
+- Split readme into seperate files
+    - cpu
+    - video
+    - I/O
 - make HLT function
 - Refactor
     - Create new branch
