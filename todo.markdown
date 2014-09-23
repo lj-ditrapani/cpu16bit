@@ -1,6 +1,5 @@
 - Get coffeelint running
 - Ensure within 72 chars
-- Update readme with BRN details for 10VC
 - Split readme into seperate files
     - cpu
     - video

@@ -1,18 +1,50 @@
----------|---------|---------|---------|---------|---------|---------|--
-http://jsfiddle.net/bL2eszp8/6/
+﻿---------|---------|---------|---------|---------|---------|---------|--
+http://jsfiddle.net/bL2eszp8/21
 
-16 x 2 x 16-bit colors
-(16 pairs of 16-bit colors)
-4 bit color pair index
-8x8 pixel tiles
-256 tile index
-60 x 40 chars/tiles
-480 x 320 pixel screen
-video RAM
-4,480 Words (< 9KB)
- +256 sprite attribute data for 128 sprites
- +300 (flip x, y grid cell tile)
-5,036 Words (< 10,072B)
+General
+-------
+
+16-bit CPU
+16 X 16-bit registers
+2^16 = 65,536 memory addresses (16-bit resolution)
+16-bit memory cells
+A word is 16 bits
+64 KWords = 128 KB = 1 M-bit
+16-bit program counter (PC)
+16 operations (4-bit op-code)
+
+20 MHz
+10 Million instructions per second (min)
+
+Triple ported register file
+(2 reads, 1 write per clock)
+CPLD like Control
+10 function ALU (4 control bits)
+
+
+Instruction Meaning
+-------------------
+
+0 HLT    Halt
+1 LBY    Low byte
+2 HBY    High byte
+3 LOD    Load
+4 STR    Store
+5 ADD    
+6 SUB    
+7 ADI    Add 4-bit immediate
+8 SBI    Subtract 4-bit immediate
+9 AND    
+A ORR    or
+B XOR    exclusive or
+C NOT    
+D SHF    Shift
+E BRN    Branch
+F SPC    Save PC
+
+
+Insruction operation
+--------------------
 
 0 HLT
 1 LBY    RD[07-00] <- immd8
@@ -31,9 +63,10 @@ D SHF    RD <- RS1 shifted by immd4
 E BRN    PC <- R2 if R1 matches NZPCV
 F SPC    RD <- PC + 2
 
+
 SHF  Shift, zero fill
 Carry contains bit of last bit shifted out
-immd4
+immd4 format
 DAAA
 D is direction:  0 left, 1 right
 AAA is (amount - 1)
@@ -42,26 +75,27 @@ Assembly:
 SHF R3 L 2 RA ->  $D31A
 SHF R7 R 7 R0 ->  $D7E0
 
+
 BRN M---
 M is mode
 0NZP    0 is value mode (negative zero positive)
 10VC    1 is flag mode (overflow carry)
-0111    unconditional jump
-0000    no op
+0111    unconditional jump (jump if value is Neg, Zero or Positive
+0000    never jump (no operation; NOP)
+1000    jump if carry and overflow are *NOT* set (ignore value)
+1011    jump if carry or overflow are set (probably useless)
+1010    jump if overflow set (don’t care about carry)
+1001    jump if carry set (don’t care about overflow)
 
-16 X 16-bit registers
-Have seperate PC so we can do more in
-parallel
+Because you want to handle a carry or overflow situations differently
+You may be interested in ensuring NO exceptions (1000). You probably
+wouldn’t know what to do if both exceptions happened;
+just handle each separately
+BRN 1011 is probably not useful.
 
-64 KWords = 128 KB = 1 M-bit
-20 MHz
-10 Million instructions per second
 
-Triple ported register file
-(2 reads, 1 write per clock)
-CPLD like Control
-13 function ALU (4 control bits)
-
+Instruction format
+------------------
 
         Mm Reg  01 02 03
 0 HLT    - --    0  0  0
@@ -77,7 +111,7 @@ CPLD like Control
 A ORR    - RW   R1 R2 RD
 B XOR    - RW   R1 R2 RD
 C NOT    - RW   R1  0 RD
-D SHF    - RW   R1 SC RD
+D SHF    - RW   R1 DA RD
 E BRN    - RP   RV RP cond
 F SPC    - RW    0  0 RD
 
@@ -86,27 +120,9 @@ Nibble 00:  op code
 Nibble 01:  0, high nibble of 8-bit const, Memory address register,
             ALU input 1 register
 Nibble 02:  0, low nibble of 8-bit const, data in register to STR DI,
-            ALU input 2 register, unsigned const, signed const,
+            ALU input 2 register, unsigned const, dir & amount for SHF,
             PC address register
 Nibble 03:  0, cond, destination register to WRITE to
-
-
-0 HLT    Halt
-1 LBY    Low byte
-2 HBY    High byte
-3 LOD    Load
-4 STR    Store
-5 ADD    
-6 SUB    
-7 ADI    Add 4-bit immediate
-8 SBI    Subtract 4-bit immediate
-9 AND    
-A ORR    
-B XOR    
-C NOT    
-D SHF    Shift
-E BRN    Branch
-F SPC    Save PC
 
 
 Reg (1 clock)
@@ -124,6 +140,9 @@ Decode & Reg read
 Memory read & reg write               1 clock
 
 
+Video
+------------
+
 Video Ram
 32 16bit colors   32    Words
 Single tile        8    Words   8 X 8 tile times 2 bits
@@ -134,20 +153,28 @@ Each tile cell     1    Word    8 bit tile select +
 Number of cells 2400    60 X 40
 Total           4480    Words
 
+16 x 2 x 16-bit colors
+(16 pairs of 16-bit colors)
+4 bit color pair index
+8x8 pixel tiles
+256 tile index
+60 x 40 chars/tiles
+480 x 320 pixel screen
+video RAM
+4,480 Words (< 9KB)
+ +256 sprite attribute data for 128 sprites
+ +300 (flip x, y grid cell tile)
+5,036 Words (< 10,072B)
 
-I/O
-10 Million instructions per second
- 1 Million instructions per frame
-   100 K instructions for I/O per frame
-    10 K I/O operations per frame
-       4,480 video output
-       500 sound (20 changes of 20 registers)
-       5K Network/HDD access (1K each read, 1K each write?)
-       10 operation for keyboard input (10 key down, 10 key up)
-                1 byte per action: first bit up or down,
-                                   next seven = key code
-                Saves up to 20 actions, anymore are dumped
-
+Sprites
+128 sprites
+2 words per sprite
+256 words
+Sprite data
+position    color pairs    Mirrors    Tile  |  Total
+x    y      1    2         x   y            |
+6    6      4    4         1   1      8     |  30
+30 bits < 2 words
 
 Video hardware
 --------------
@@ -180,6 +207,23 @@ Video loop 2 (8 operations)
 1.8 million cycles available
 
 
+I/O
+-----------
+
+I/O
+10 Million instructions per second
+ 1 Million instructions per frame
+   100 K instructions for I/O per frame
+    10 K I/O operations per frame
+       4,480 video output
+       500 sound (20 changes of 20 registers)
+       5K Network/HDD access (1K each read, 1K each write?)
+       10 operation for keyboard input (10 key down, 10 key up)
+                1 byte per action: first bit up or down,
+                                   next seven = key code
+                Saves up to 20 actions, anymore are dumped
+
+
 Words
    10 Keyboard input (20 actions per frame/200 actions per second)
 4,480 Video out
@@ -187,13 +231,3 @@ Words
 2,048 Network I/O (1K read, 1K write)
 2,048 HDD or SD card I/O (1K read, 1K write)
   256 Sprite attribute data
-
-Sprites
-128 sprites
-2 words per sprite
-256 words
-Sprite data
-position    color pairs    Mirrors    Tile  |  Total
-x    y      1    2         x   y            |
-6    6      4    4         1   1      8     |  30
-30 bits < 2 words
