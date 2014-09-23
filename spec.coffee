@@ -200,7 +200,7 @@ test 'LOD', ->
     @cpu.registers[addressRegister] = address
     @cpu.ram[address] = value
     @cpu.ram[0] = makeInstruction(
-        3, addressRegister, 0, destRegister
+      3, addressRegister, 0, destRegister
     )
     @cpu.step()
     equal @cpu.registers[destRegister], value
@@ -215,9 +215,7 @@ test 'STR', ->
     @cpu.pc = 0
     @cpu.registers[addressRegister] = address
     @cpu.registers[valueRegister] = value
-    @cpu.ram[0] = makeInstruction(
-        4, addressRegister, valueRegister, 0
-    )
+    @cpu.ram[0] = makeInstruction(4, addressRegister, valueRegister, 0)
     @cpu.step()
     equal @cpu.ram[address], value
 

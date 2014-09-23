@@ -1,5 +1,4 @@
-- Get coffeelint running
-- Ensure within 72 chars
+- Run coffeelint
 - Split readme into seperate files
     - cpu
     - video
