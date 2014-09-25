@@ -485,6 +485,22 @@ test 'SPC', ->
     @cpu.step()
     equal @cpu.registers[rd], pc, "#{rd} #{pc}"
 
+test 'loadProgram', ->
+  program = [
+    1
+    2
+    3
+    4
+    5
+  ]
+  @cpu.loadProgram program
+  equal @cpu.ram[0], 1
+  equal @cpu.ram[4], 5
+
 test 'add program', ->
+  program = [
+  ]
+  # loadProgram program
+  # equal @cpu.ram[0x0102], 100
 
 test 'branch program', ->

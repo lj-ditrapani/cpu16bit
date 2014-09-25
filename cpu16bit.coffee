@@ -93,6 +93,12 @@ class CPU
     while not halt
       halt = step()
 
+  loadProgram: (program) ->
+    i = 0
+    for value in program
+      @ram[i] = value
+      i += 1
+
   add: (a, b, carry) ->
     sum = a + b + carry
     @carry = Number(sum >= Math.pow(2, 16))
