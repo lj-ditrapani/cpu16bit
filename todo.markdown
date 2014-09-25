@@ -1,13 +1,11 @@
 - Run coffeelint
-- Split readme into seperate files
-    - cpu
-    - video
-    - I/O
-- make HLT function
+- Full assembly program tests
 - Refactor
     - Create new branch
     - refactor test
     - refactor code
-- Run method
-- Full assembly program tests
+- Split readme into seperate files
+    - cpu
+    - video
+    - I/O
 - I/O memory map

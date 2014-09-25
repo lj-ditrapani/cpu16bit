@@ -174,6 +174,11 @@ testImmdLoad = (cpu, tests, opCode) ->
     cpu.step()
     equal cpu.registers[register], finalValue
 
+test 'HLT', ->
+  @cpu.ram[0] = 0
+  equal @cpu.step(), true
+  equal @cpu.pc, 0
+
 test 'LBY', ->
   tests = [
     [5, 0, 0, 5]
@@ -479,3 +484,7 @@ test 'SPC', ->
     @cpu.ram[pc] = makeInstruction(15, 0, 0, rd)
     @cpu.step()
     equal @cpu.registers[rd], pc, "#{rd} #{pc}"
+
+test 'add program', ->
+
+test 'branch program', ->

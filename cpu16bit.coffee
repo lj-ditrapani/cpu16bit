@@ -8,6 +8,8 @@ http://jsfiddle.net/bL2eszp8/
 if (typeof ljd).toString() == 'undefined'
   window.ljd = {}
 
+HALT = 0
+
 getNibbles = (word) ->
   opCode = word >> 12
   a = (word >> 8) & 0xF
@@ -78,9 +80,18 @@ class CPU
 
   step: ->
     instruction = @ram[@pc]
-    @pc += 1
     [opCode, a, b, c] = getNibbles(instruction)
-    this[@opCodes[opCode]](a, b, c)
+    if opCode == HALT
+      true
+    else
+      [jump, address] = this[@opCodes[opCode]](a, b, c)
+      @pc = if jump is true then address else @pc + 1
+      false
+
+  run: ->
+    halt = false
+    while not halt
+      halt = step()
 
   add: (a, b, carry) ->
     sum = a + b + carry
@@ -163,10 +174,10 @@ class CPU
       matchFlags(@overflow, @carry, cond - 8)
     else
       matchValue(value, cond)
-    if takeJump then @pc = jumpAddr
+    if takeJump then [true, jumpAddr] else [false, 0]
 
   SPC: (r1, _, rd) ->
-    @registers[rd] = @pc - 1
+    @registers[rd] = @pc
      
 
 ljd.cpu16bit =
