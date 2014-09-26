@@ -1,10 +1,11 @@
 - Run coffeelint
 - Full assembly program tests
+    - while loop program from SWE 430 FY13A Exercise 2
 - Refactor
     - Create new branch
     - refactor test
     - refactor code
-- Split readme into seperate files
+- Split readme into separate files
     - cpu
     - video
     - I/O
