@@ -159,7 +159,7 @@ class CPU
     [a, b] = [@registers[r1], @registers[r2]]
     @registers[rd] = a ^ b
 
-  NOT: (r1, r2, rd) ->
+  NOT: (r1, _, rd) ->
     a = @registers[r1]
     @registers[rd] = a ^ 0xFFFF
 
@@ -182,7 +182,7 @@ class CPU
       matchValue(value, cond)
     if takeJump then [true, jumpAddr] else [false, 0]
 
-  SPC: (r1, _, rd) ->
+  SPC: (_, __, rd) ->
     @registers[rd] = @pc
      
 
