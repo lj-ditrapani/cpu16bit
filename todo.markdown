@@ -1,3 +1,4 @@
+- Add basic tty I/O (char/hex/decimal streams)
 - Run coffeelint
 - Full assembly program tests
     - while loop program from SWE 430 FY13A Exercise 2
