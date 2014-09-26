@@ -474,16 +474,16 @@ test 'BRN flag', ->
 
 test 'SPC', ->
   tests = [
-    [0, 0x0000]
-    [1, 0x00FF]
-    [15, 0x0F00]
+    [0, 0x0000, 0x0002]
+    [1, 0x00FF, 0x0101]
+    [15, 0x0F00, 0x0F02]
   ]
-  for [rd, pc] in tests
+  for [rd, pc, value] in tests
     @cpu.pc = pc
     @cpu.registers[rd] = 0
     @cpu.ram[pc] = makeInstruction(15, 0, 0, rd)
     @cpu.step()
-    equal @cpu.registers[rd], pc, "#{rd} #{pc}"
+    equal @cpu.registers[rd], value, "#{rd} #{pc} #{value}"
 
 test 'loadProgram', ->
   program = [

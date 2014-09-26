@@ -183,7 +183,7 @@ class CPU
     if takeJump then [true, jumpAddr] else [false, 0]
 
   SPC: (_, __, rd) ->
-    @registers[rd] = @pc
+    @registers[rd] = @pc + 2
      
 
 ljd.cpu16bit =
