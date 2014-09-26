@@ -524,4 +524,65 @@ test 'adding program', ->
   equal @cpu.ram[0x0102], 100, "27 + 73 = 100"
   equal @cpu.pc, 8, "PC = 8"
 
-test 'branch program', ->
+test 'branching program', ->
+  # RA (register 10) is used for all value addresses
+  # RB has address of 2nd branch
+  # RC has address of final, common, end of program
+  # A is stored in M[0100]
+  # B is stored in M[0101]
+  # If A - B < 3, store 255 in M[0102], else store 1 in M[0102]
+  # Put A in R1
+  # Put B in R2
+  # Sub A - B and put in R3
+  # Load const 3 into R4
+  # Sub R3 - R4 => R5
+  # If R5 is negative, 255 => R6, else 1 => R6
+  # Store R6 into M[0102]
+  program = [
+    # Load 2nd branch address into RB
+    0x200B    # 00 HBY 0x00 RB
+    0x110B    # 01 LBY 0x10 RB
+
+    # Load end of program address int RC
+    0x7B2C    # 02 ADI RB 2 RC
+
+    # Load A value into R1
+    0x201A    # 03 HBY 0x01 RA
+    0x100A    # 04 LBY 0x00 RA
+    0x3A01    # 05 LOD RA R1
+
+    # Load B value into R2
+    0x101A    # 06 LBY 0x01 RA
+    0x3A02    # 07 LOD RA R2
+
+    0x6123    # 08 SUB R1 R2 R3
+
+    # Load constant 3 to R4
+    0x2004    # 09 HBY 0x00 R4
+    0x1034    # 0A LBY 0x03 R4
+
+    0x6345    # 0B SUB R3 R4 R5
+
+    # Branch to ? if A - B >= 3
+    0xE5B3    # 0C BRN R5 RB ZP
+
+    # Load constant 255 into R6
+    0x2006    # 0D HBY 0x00 R6
+    0x1FF6    # 0E LBY 0xFF R6
+    0xE0C7    # 0F BRN R0 RC NZP (Jump to end)
+
+    # Load constant 0x01 into R6
+    0x2006    # 10 HBY 0x00 R6
+    0x1016    # 11 LBY 0x01 R6
+
+    # Store final value into M[0102]
+    0x102A    # 12 LBY 0x02 RA
+    0x4A60    # 13 STR RA R6
+    0x0000    # 14 HLT
+  ]
+  @cpu.ram[0x0100] = 101
+  @cpu.ram[0x0101] = 99
+  @cpu.loadProgram program
+  @cpu.run()
+  equal @cpu.ram[0x0102], 255, "101 - 99 < 3 => 255"
+  equal @cpu.pc, 20, "PC = 20"
