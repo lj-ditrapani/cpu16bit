@@ -91,7 +91,7 @@ class CPU
   run: ->
     halt = false
     while not halt
-      halt = step()
+      halt = @step()
 
   loadProgram: (program) ->
     i = 0

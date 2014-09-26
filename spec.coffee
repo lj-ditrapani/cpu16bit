@@ -497,10 +497,31 @@ test 'loadProgram', ->
   equal @cpu.ram[0], 1
   equal @cpu.ram[4], 5
 
-test 'add program', ->
+test 'adding program', ->
+  # RA (register 10) is used for all addresses
+  # A is stored in M[0100]
+  # B is stored in M[0101]
+  # Add A and B and store in M[0102]
+  # Put A in R1
+  # Put B in R2
+  # Add A + B and put in R3
+  # Store R3 into M[0102]
   program = [
+    0x201A    # HBY 0x01 RA
+    0x100A    # LBY 0x00 RA
+    0x3A01    # LOD RA R1
+    0x101A    # LBY 0x01 RA
+    0x3A02    # LOD RA R2
+    0x5123    # ADD R1 R2 R3
+    0x102A    # LBY 0x02 RA
+    0x4A30    # STR RA R3
+    0x0000    # HLT
   ]
-  # loadProgram program
-  # equal @cpu.ram[0x0102], 100
+  @cpu.ram[0x0100] = 27
+  @cpu.ram[0x0101] = 73
+  @cpu.loadProgram program
+  @cpu.run()
+  equal @cpu.ram[0x0102], 100, "27 + 73 = 100"
+  equal @cpu.pc, 8, "PC = 8"
 
 test 'branch program', ->
