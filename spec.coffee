@@ -8,8 +8,8 @@ cpu16bit = ljd.cpu16bit
 
 test 'makeImmediate8Instruction', ->
   tests = [
-    [1, 0xFF, 0x5, 0x1FF5, 'LBY']
-    [2, 0x17, 0xF, 0x217F, 'HBY']
+    [1, 0x17, 0xF, 0x117F, 'HBY']
+    [2, 0xFF, 0x5, 0x2FF5, 'LBY']
   ]
   for [opCode, immediate, register, instruction, name] in tests
     equal makeImmediate8Instruction(opCode, immediate, register),
@@ -179,19 +179,19 @@ test 'END', ->
   equal @cpu.step(), true
   equal @cpu.pc, 0
 
-test 'LBY', ->
-  tests = [
-    [5, 0, 0, 5]
-    [0, 3, 0xFFFF, 0xFF00]
-    [0xEA, 15, 0x1234, 0x12EA]
-  ]
-  testImmdLoad @cpu, tests, 1
-
 test 'HBY', ->
   tests = [
     [0x05, 0, 0x0000, 0x0500]
     [0x00, 3, 0xFFFF, 0x00FF]
     [0xEA, 15, 0x1234, 0xEA34]
+  ]
+  testImmdLoad @cpu, tests, 1
+
+test 'LBY', ->
+  tests = [
+    [5, 0, 0, 5]
+    [0, 3, 0xFFFF, 0xFF00]
+    [0xEA, 15, 0x1234, 0x12EA]
   ]
   testImmdLoad @cpu, tests, 2
 
@@ -507,13 +507,13 @@ test 'adding program', ->
   # Add A + B and put in R3
   # Store R3 into M[0102]
   program = [
-    0x201A    # HBY 0x01 RA
-    0x100A    # LBY 0x00 RA
+    0x101A    # HBY 0x01 RA
+    0x200A    # LBY 0x00 RA
     0x3A01    # LOD RA R1
-    0x101A    # LBY 0x01 RA
+    0x201A    # LBY 0x01 RA
     0x3A02    # LOD RA R2
     0x5123    # ADD R1 R2 R3
-    0x102A    # LBY 0x02 RA
+    0x202A    # LBY 0x02 RA
     0x4A30    # STR RA R3
     0x0000    # END
   ]
@@ -540,26 +540,26 @@ test 'branching program', ->
   # Store R6 into M[0102]
   program = [
     # Load 2nd branch address into RB
-    0x200B    # 00 HBY 0x00 RB
-    0x110B    # 01 LBY 0x10 RB
+    0x100B    # 00 HBY 0x00 RB
+    0x210B    # 01 LBY 0x10 RB
 
     # Load end of program address int RC
     0x7B2C    # 02 ADI RB 2 RC
 
     # Load A value into R1
-    0x201A    # 03 HBY 0x01 RA
-    0x100A    # 04 LBY 0x00 RA
+    0x101A    # 03 HBY 0x01 RA
+    0x200A    # 04 LBY 0x00 RA
     0x3A01    # 05 LOD RA R1
 
     # Load B value into R2
-    0x101A    # 06 LBY 0x01 RA
+    0x201A    # 06 LBY 0x01 RA
     0x3A02    # 07 LOD RA R2
 
     0x6123    # 08 SUB R1 R2 R3
 
     # Load constant 3 to R4
-    0x2004    # 09 HBY 0x00 R4
-    0x1034    # 0A LBY 0x03 R4
+    0x1004    # 09 HBY 0x00 R4
+    0x2034    # 0A LBY 0x03 R4
 
     0x6345    # 0B SUB R3 R4 R5
 
@@ -567,16 +567,16 @@ test 'branching program', ->
     0xE5B3    # 0C BRN R5 RB ZP
 
     # Load constant 255 into R6
-    0x2006    # 0D HBY 0x00 R6
-    0x1FF6    # 0E LBY 0xFF R6
+    0x1006    # 0D HBY 0x00 R6
+    0x2FF6    # 0E LBY 0xFF R6
     0xE0C7    # 0F BRN R0 RC NZP (Jump to end)
 
     # Load constant 0x01 into R6
-    0x2006    # 10 HBY 0x00 R6
-    0x1016    # 11 LBY 0x01 R6
+    0x1006    # 10 HBY 0x00 R6
+    0x2016    # 11 LBY 0x01 R6
 
     # Store final value into M[0102]
-    0x102A    # 12 LBY 0x02 RA
+    0x202A    # 12 LBY 0x02 RA
     0x4A60    # 13 STR RA R6
     0x0000    # 14 END
   ]

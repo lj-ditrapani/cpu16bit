@@ -1,14 +1,4 @@
 ---------|---------|---------|---------|---------|---------|---------|--
-- Switch
-    1 LBY
-    2 HBY
-    To
-    1 HBY
-    2 LBY
-- Readme file
-    - Split ISA from implementation
-    - Have cpu file
-      And separate computer file (MHz, register file porting, etc)
 - Add basic tty I/O (char/hex/decimal streams)
 - Run coffeelint
 - Full assembly program tests
@@ -17,8 +7,12 @@
     - Create new branch
     - refactor test
     - refactor code
+- Split specs into seprate spec files (unit acceptance I/O video)
 - Split readme into separate files
     - cpu
     - video
     - I/O
-- I/O memory map
+- Readme file
+    - Split ISA from implementation
+    - Have cpu file
+      And separate computer file (MHz, register file porting, etc)

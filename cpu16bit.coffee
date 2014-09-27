@@ -68,7 +68,7 @@ class CPU
 
   constructor: ->
     @reset()
-    @opCodes = ('END LBY HBY LOD STR ADD SUB ADI SBI AND' +
+    @opCodes = ('END HBY LBY LOD STR ADD SUB ADI SBI AND' +
                  ' ORR XOR NOT SHF BRN SPC').split(' ')
 
   reset: ->
@@ -106,15 +106,15 @@ class CPU
     @overflow = Number(hasOverflowedOnAdd(a, b, sum))
     sum
 
-  LBY: (highNibble, lowNibble, register) ->
-    immediate8 = (highNibble << 4) | lowNibble
-    value = @registers[register]
-    @registers[register] = (value & 0xFF00) | immediate8
-
   HBY: (highNibble, lowNibble, register) ->
     immediate8 = (highNibble << 4) | lowNibble
     value = @registers[register]
     @registers[register] = (immediate8 << 8) | (value & 0x00FF)
+
+  LBY: (highNibble, lowNibble, register) ->
+    immediate8 = (highNibble << 4) | lowNibble
+    value = @registers[register]
+    @registers[register] = (value & 0xFF00) | immediate8
 
   LOD: (ra, _, rd) ->
     address = @registers[ra]
