@@ -5,13 +5,13 @@ General
 -------
 
 16-bit CPU
-16 X 16-bit registers
+16 X 16-bit registers and program counter (PC)
 2^16 = 65,536 memory addresses (16-bit resolution)
 16-bit memory cells
-A word is 16 bits
+A word is 16 bits (2 bytes)
 64 KWords = 128 KB = 1 M-bit
-16-bit program counter (PC)
-16 operations (4-bit op-code)
+All instructions are 16 bits long
+16 instructions (4-bit op-code)
 
 20 MHz
 10 Million instructions per second (min)
@@ -25,9 +25,9 @@ CPLD like Control
 Instruction Meaning
 -------------------
 
-0 HLT    Halt
-1 LBY    Low byte
-2 HBY    High byte
+0 END    Halt computer
+1 HBY    High byte
+2 LBY    Low byte
 3 LOD    Load
 4 STR    Store
 5 ADD    
@@ -46,22 +46,22 @@ F SPC    Save PC
 Insruction operation
 --------------------
 
-0 HLT
-1 LBY    RD[07-00] <- immd8
-2 HBY    RD[15-08] <- immd8
-3 LOD    RD <- M[R1]
-4 STR    M[R1] <- R2
-5 ADD    RD <- RS1 + RS2
-6 SUB    RD <- RS1 - RS2
-7 ADI    RD <- RS1 + immd4
-8 SBI    RD <- RS1 - immd4
-9 AND    RD <- RS1 and RS2
-A ORR    RD <- RS1 or RS2
-B XOR    RD <- RS1 xor RS2
-C NOT    RD <- ! R1
-D SHF    RD <- RS1 shifted by immd4
-E BRN    PC <- R2 if R1 matches NZPCV
-F SPC    RD <- PC + 2
+0 END
+1 HBY    immd8 -> RD[15-08]
+2 LBY    immd8 -> RD[07-00]
+3 LOD    M[R1] -> RD
+4 STR    R2 -> M[R1]
+5 ADD    RS1 + RS2 -> RD
+6 SUB    RS1 - RS2 -> RD
+7 ADI    RS1 + immd4 -> RD
+8 SBI    RS1 - immd4 -> RD
+9 AND    RS1 and RS2 -> RD
+A ORR    RS1 or RS2 -> RD
+B XOR    RS1 xor RS2 -> RD
+C NOT    ! R1 -> RD
+D SHF    S1 shifted by immd4 -> RD
+E BRN    if (R1 matches NZP) or CV then (R2 -> PC)
+F SPC    PC + 2 -> RD
 
 
 SHF  Shift, zero fill
@@ -97,23 +97,23 @@ BRN 1011 is probably not useful.
 Instruction format
 ------------------
 
-        Mm Reg  01 02 03
-0 HLT    - --    0  0  0
-1 LBY    - -W   UC UC RD
-2 HBY    - -W   UC UC RD
-3 LOD    R RW   RA  0 RD
-4 STR    W R-   RA R2  0
-5 ADD    - RW   R1 R2 RD
-6 SUB    - RW   R1 R2 RD
-7 ADI    - RW   R1 UC RD
-8 SBI    - RW   R1 UC RD
-9 AND    - RW   R1 R2 RD
-A ORR    - RW   R1 R2 RD
-B XOR    - RW   R1 R2 RD
-C NOT    - RW   R1  0 RD
-D SHF    - RW   R1 DA RD
-E BRN    - RP   RV RP cond
-F SPC    - RW    0  0 RD
+        Mm Reg   01 02 03
+0 END    - ----    0  0  0
+1 HBY    - --W-   UC UC RD
+2 LBY    - --W-   UC UC RD
+3 LOD    R R-W-   RA  0 RD
+4 STR    W RR--   RA R2  0
+5 ADD    - RRW-   R1 R2 RD
+6 SUB    - RRW-   R1 R2 RD
+7 ADI    - R-W-   R1 UC RD
+8 SBI    - R-W-   R1 UC RD
+9 AND    - RRW-   R1 R2 RD
+A ORR    - RRW-   R1 R2 RD
+B XOR    - RRW-   R1 R2 RD
+C NOT    - R-W-   R1  0 RD
+D SHF    - R-W-   R1 DA RD
+E BRN    - RR-W   RV RP cond
+F SPC    - --W-    0  0 RD
 
 
 Nibble 00:  op code
@@ -144,14 +144,28 @@ Video
 ------------
 
 Video Ram
-32 16bit colors   32    Words
+Color are 16-bit
+32 tile colors    32    Words
+32 sprite colors  32    words
 Single tile        8    Words   8 X 8 tile times 2 bits
                                 (16 bits per word)
 Tile index      2048    Words   256 tiles X 8 words
 Each tile cell     1    Word    8 bit tile select +
         4 bit foreground color pair + 4 bit background color pair
 Number of cells 2400    60 X 40
-Total           4480    Words
+cell x y flip    300    Words   2 bit X 2,400 / 16
+Sprites          256    attribute data for 128 sprites
+
+                words
+---------------------
+Tile index      2,048
+Grid cells      2,400
+Cell x y flip     300
+Sprites           256
+Tile colors        32
+Sprite colors      32
+---------------------
+Total           5,068
 
 16 x 2 x 16-bit colors
 (16 pairs of 16-bit colors)
@@ -161,10 +175,7 @@ Total           4480    Words
 60 x 40 chars/tiles
 480 x 320 pixel screen
 video RAM
-4,480 Words (< 9KB)
- +256 sprite attribute data for 128 sprites
- +300 (flip x, y grid cell tile)
-5,036 Words (< 10,072B)
+5,068 Words (< 10 KB)
 
 Sprites
 128 sprites
@@ -225,9 +236,8 @@ I/O
 
 
 Words
+  512 Sound out   
    10 Keyboard input (20 actions per frame/200 actions per second)
-4,480 Video out
-  510 Sound out
 2,048 Network I/O (1K read, 1K write)
 2,048 HDD or SD card I/O (1K read, 1K write)
-  256 Sprite attribute data
+5,068 Video out
