@@ -174,7 +174,7 @@ testImmdLoad = (cpu, tests, opCode) ->
     cpu.step()
     equal cpu.registers[register], finalValue
 
-test 'HLT', ->
+test 'END', ->
   @cpu.ram[0] = 0
   equal @cpu.step(), true
   equal @cpu.pc, 0
@@ -515,7 +515,7 @@ test 'adding program', ->
     0x5123    # ADD R1 R2 R3
     0x102A    # LBY 0x02 RA
     0x4A30    # STR RA R3
-    0x0000    # HLT
+    0x0000    # END
   ]
   @cpu.ram[0x0100] = 27
   @cpu.ram[0x0101] = 73
@@ -578,7 +578,7 @@ test 'branching program', ->
     # Store final value into M[0102]
     0x102A    # 12 LBY 0x02 RA
     0x4A60    # 13 STR RA R6
-    0x0000    # 14 HLT
+    0x0000    # 14 END
   ]
   @cpu.ram[0x0100] = 101
   @cpu.ram[0x0101] = 99

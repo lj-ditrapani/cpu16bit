@@ -8,7 +8,7 @@ http://jsfiddle.net/bL2eszp8/
 if (typeof ljd).toString() == 'undefined'
   window.ljd = {}
 
-HALT = 0
+END = 0
 
 getNibbles = (word) ->
   opCode = word >> 12
@@ -68,7 +68,7 @@ class CPU
 
   constructor: ->
     @reset()
-    @opCodes = ('HLT LBY HBY LOD STR ADD SUB ADI SBI AND' +
+    @opCodes = ('END LBY HBY LOD STR ADD SUB ADI SBI AND' +
                  ' ORR XOR NOT SHF BRN SPC').split(' ')
 
   reset: ->
@@ -81,7 +81,7 @@ class CPU
   step: ->
     instruction = @ram[@pc]
     [opCode, a, b, c] = getNibbles(instruction)
-    if opCode == HALT
+    if opCode == END
       true
     else
       [jump, address] = this[@opCodes[opCode]](a, b, c)
@@ -89,9 +89,9 @@ class CPU
       false
 
   run: ->
-    halt = false
-    while not halt
-      halt = @step()
+    end = false
+    while not end
+      end = @step()
 
   loadProgram: (program) ->
     i = 0
