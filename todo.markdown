@@ -1,8 +1,12 @@
 ---------|---------|---------|---------|---------|---------|---------|--
-- Add basic tty I/O (char/hex/decimal streams)
 - Run coffeelint
 - Full assembly program tests
     - while loop program from SWE 430 FY13A Exercise 2
+- Add basic debug I/O (hex, decimal, ASCII char streams)
+    - Exceptions for bad I/O (write to input, read output)
+    - hex
+    - ASCII
+    - decimal is complete; needs exceptions
 - Refactor
     - Create new branch
     - refactor test

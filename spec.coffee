@@ -158,8 +158,10 @@ module "cpu 16-bit",
 
 test "Initial State", ->
   equal @cpu.ram.length, 65536, '65536 RAM cells'
-  deepEqual [@cpu.ram[0], @cpu.ram[65535]], [0, 0],
+  deepEqual [@cpu.ram[0], @cpu.ram[0xFFF9]], [0, 0],
             'RAM init to all 0'
+  deepEqual [@cpu.ram[0xFFFA], @cpu.ram[0xFFFF]], [[], []],
+            'Last 6 RAM addresses are buffers'
   equal @cpu.registers.length, 16, '16 registers'
   equal @cpu.opCodes.length, 16, '16 op codes'
   deepEqual @cpu.pc, 0, 'pc = 0'
@@ -484,6 +486,30 @@ test 'SPC', ->
     @cpu.ram[pc] = makeInstruction(15, 0, 0, rd)
     @cpu.step()
     equal @cpu.registers[rd], value, "#{rd} #{pc} #{value}"
+
+test 'Read from decimal debug input', ->
+  addressRegister = 0xC
+  decInputAddress = 0xFFFC
+  @cpu.ram[decInputAddress] = [42, 24, 7]
+  @cpu.registers[addressRegister] = decInputAddress
+  @cpu.ram[0] = makeInstruction(3, addressRegister, 0, 0x0)
+  @cpu.ram[1] = makeInstruction(3, addressRegister, 0, 0x1)
+  @cpu.run()
+  deepEqual @cpu.ram[decInputAddress], [7]
+  deepEqual [@cpu.registers[0], @cpu.registers[1]], [42, 24]
+
+test 'Write to decimal debug output', ->
+  addressRegister = 0xA
+  decOutputAddress = 0xFFFD
+  value0 = 42
+  value1 = 24
+  @cpu.registers[0x0] = value0
+  @cpu.registers[0x1] = value1
+  @cpu.registers[addressRegister] = decOutputAddress
+  @cpu.ram[0] = makeInstruction(4, addressRegister, 0x0, 0)
+  @cpu.ram[1] = makeInstruction(4, addressRegister, 0x1, 0)
+  @cpu.run()
+  deepEqual @cpu.ram[decOutputAddress], [value0, value1]
 
 test 'loadProgram', ->
   program = [

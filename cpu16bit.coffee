@@ -75,6 +75,8 @@ class CPU
     @pc = 0
     @registers = (0 for _ in [0...16])
     @ram = (0 for _ in [0...Math.pow(2, 16)])
+    for i in [0xFFFA..0xFFFF]
+      @ram[i] = []
     @carry = 0
     @overflow = 0
 
@@ -118,12 +120,19 @@ class CPU
 
   LOD: (ra, _, rd) ->
     address = @registers[ra]
-    @registers[rd] = @ram[address]
+    @registers[rd] = if address >= 0xFFFA
+      @ioRead(address)
+    else
+      @ram[address]
 
   STR: (ra, r2, _) ->
     console.log(ra, r2)
     address = @registers[ra]
-    @ram[address] = @registers[r2]
+    value = @registers[r2]
+    if address >= 0xFFFA
+      @ioWrite(address, value)
+    else
+      @ram[address] = value
 
   ADD: (r1, r2, rd) ->
     [a, b] = [@registers[r1], @registers[r2]]
@@ -184,7 +193,13 @@ class CPU
 
   SPC: (_, __, rd) ->
     @registers[rd] = @pc + 2
-     
+
+  ioRead: (address) ->
+    @ram[address].shift()
+
+  ioWrite: (address, value) ->
+    @ram[address].push value
+
 
 ljd.cpu16bit =
   CPU: CPU
