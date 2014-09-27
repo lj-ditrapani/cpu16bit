@@ -17,6 +17,9 @@ Numbered 0-63
 59-60  Tile Index Output    60,416-62,463   $EC00-$F3FF
 61-63  video      Output    62,464-65,484   $F400-$FFCC
 
+63 (1 word)
+0xFFF9 Frame interrupt vector
+
 63 (last 6 words)
 Debug I/O
 0xFFFA              HEX        Input  $abcd
