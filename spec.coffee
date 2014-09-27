@@ -612,3 +612,53 @@ test 'branching program', ->
   @cpu.run()
   equal @cpu.ram[0x0102], 255, "101 - 99 < 3 => 255"
   equal @cpu.pc, 20, "PC = 20"
+
+test 'Program with while loop', ->
+  # Run a complete program
+  # Uses decimal I/O ports
+  # Input: n followed by a list of n integers
+  # Output: -2 * sum(list of n integers)
+  program = [
+    # R0 gets input address
+    0x1FF0      # 0 HBY 0xFF R0       0xFF -> Upper(R0)
+    0x2FC0      # 1 LBY 0xFC R0       0xFC -> Lower(R0)
+
+    # R1 gets output address
+    0x1FF1      # 2 HBY 0xFF R1       0xFF -> Upper(R1)
+    0x2FD1      # 3 LBY 0xFD R1       0xFD -> Lower(R1)
+
+    # R2 gets n, the count of how many input values to sum
+    0x3002      # 4 LOD R0 R2         First Input (count n) -> R2
+
+    # R3 and R4 have start and end of while loop respectively
+    0x2073      # 5 LBY 0x.. R3       addr start of while loop -> R3
+    0x20C4      # 6 LBY 0x.. R4       addr to end while loop -> R4
+
+    # Start of while loop
+    0xE242      # 7 BRN R2 R4 Z       if R2 is zero (0x.... -> PC)
+    0x3006      # 8 LOD R0 R6         Next Input -> R6
+    0x5565      # 9 ADD R5 R6 R5      R5 + R6 (running sum) -> R5
+    0x8212      # A SBI R2 1 R2       R2 - 1 -> R2
+    0xE037      # B BRN R0 R3 NZP     0x.... -> PC (unconditional)
+
+    # End of while loop
+    0xD506      # C SHF R5 left 1 R6  Double sum
+
+    # Negate double of sum
+    0x6767      # D SUB R7 R6 R7      0 - R6 -> R7
+
+    # Output result
+    0x4170      # E STR R1 R7         Output value of R7
+    0x0000      # F END
+  ]
+  @cpu.ram[0xFFFC] = [101].concat [10..110]
+  @cpu.loadProgram program
+  @cpu.run()
+  # n = length(10..110) = 101
+  # sum(10..110) = 6060
+  # -2 * 6060 = -12120
+  # 16-bit hex(+12120) = 0x2F58
+  # 16-bit hex(-12120) = 0xD0A8
+  deepEqual @cpu.ram[0xFFFC], []
+  deepEqual @cpu.ram[0xFFFD], [0xD0A8]
+  equal @cpu.pc, 15
