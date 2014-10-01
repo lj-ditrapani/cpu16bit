@@ -171,6 +171,35 @@ module "cpu 16-bit",
         @runOneInstruction i
         equal @cpu.registers[register], finalValue
 
+    @testAddSub = (opCode, symbol, tests, immediate = false) ->
+      for [a, b, result, finalCarry, finalOverflow] in tests
+        for [initialCarry, initialOverflow] in BinaryPairs
+          [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
+          @cpu.carry = initialCarry
+          @cpu.overflow = initialOverflow
+          @registers[r1] = a
+          thirdNibble = if immediate
+            b
+          else
+            @registers[r2] = b
+            r2
+          i = makeInstruction(opCode, r1, thirdNibble, rd)
+          @runOneInstruction i
+          equal @cpu.carry, finalCarry, "#{a} #{symbol} #{b} = #{result}"
+          equal @cpu.overflow, finalOverflow
+          equal @registers[rd], result, "Result"
+
+    @testLogicOperation = (opCode, r1, r2, rd, name, tests) ->
+      for [a, b, result] in tests
+        @registers[r1] = a
+        @registers[r2] = b
+        i = makeInstruction(opCode, r1, r2, rd)
+        @runOneInstruction i
+        if name == 'NOT'
+          equal @registers[rd], result, "#{name} #{a} = #{result}"
+        else
+          equal @registers[rd], result, "#{a} #{name} #{b} = #{result}"
+
 test "Initial State", ->
   equal @ram.length, 65536, '65536 RAM cells'
   deepEqual [@ram[0], @ram[0xFFF9]], [0, 0],
@@ -244,18 +273,7 @@ test 'ADD', ->
     [0x0FFF, 0x7001, 0x8000, 0, 1]
     [0x7FFE, 0x0001, 0x7FFF, 0, 0]
   ]
-  for [a, b, sum, finalCarry, finalOverflow] in tests
-    for [initialCarry, initialOverflow] in BinaryPairs
-      [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
-      @cpu.carry = initialCarry
-      @cpu.overflow = initialOverflow
-      @registers[r1] = a
-      @registers[r2] = b
-      i = makeInstruction(5, r1, r2, rd)
-      @runOneInstruction i
-      equal @cpu.carry, finalCarry, "#{a} + #{b} = #{sum}"
-      equal @cpu.overflow, finalOverflow
-      equal @registers[rd], sum
+  @testAddSub(5, '+', tests)
 
 test 'SUB', ->
   tests = [
@@ -271,18 +289,7 @@ test 'SUB', ->
     [0x7FFF, 0xFFFF, 0x8000, 0, 1]
     [0x7FFF, 0x0001, 0x7FFE, 1, 0]
   ]
-  for [a, b, result, finalCarry, finalOverflow] in tests
-    for [initialCarry, initialOverflow] in BinaryPairs
-      [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
-      @cpu.carry = initialCarry
-      @cpu.overflow = initialOverflow
-      @registers[r1] = a
-      @registers[r2] = b
-      i = makeInstruction(6, r1, r2, rd)
-      @runOneInstruction i
-      equal @cpu.carry, finalCarry, "Carry #{a} - #{b} = #{result}"
-      equal @cpu.overflow, finalOverflow, "V"
-      equal @registers[rd], result, "Result"
+  @testAddSub(6, '-', tests)
 
 test 'ADI', ->
   tests = [
@@ -294,17 +301,7 @@ test 'ADI', ->
     [0x7FFE, 0x000F, 0x800D, 0, 1]
     [0xFEDF, 0x000E, 0xFEED, 0, 0]
   ]
-  for [a, b, sum, finalCarry, finalOverflow] in tests
-    for [initialCarry, initialOverflow] in BinaryPairs
-      [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
-      @cpu.carry = initialCarry
-      @cpu.overflow = initialOverflow
-      @registers[r1] = a
-      i = makeInstruction(7, r1, b, rd)
-      @runOneInstruction i
-      equal @cpu.carry, finalCarry, "#{a} + #{b} = #{sum}"
-      equal @cpu.overflow, finalOverflow
-      equal @registers[rd], sum
+  @testAddSub(7, '+', tests, true)
 
 test 'SBI', ->
   tests = [
@@ -316,17 +313,7 @@ test 'SBI', ->
     [0x800D, 0x000F, 0x7FFE, 1, 1]
     [0xFEED, 0x000E, 0xFEDF, 1, 0]
   ]
-  for [a, b, result, finalCarry, finalOverflow] in tests
-    for [initialCarry, initialOverflow] in BinaryPairs
-      [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
-      @cpu.carry = initialCarry
-      @cpu.overflow = initialOverflow
-      @registers[r1] = a
-      i = makeInstruction(8, r1, b, rd)
-      @runOneInstruction i
-      equal @cpu.carry, finalCarry, "#{a} - #{b} = #{result}"
-      equal @cpu.overflow, finalOverflow
-      equal @registers[rd], result
+  @testAddSub(8, '-', tests, true)
 
 test 'AND', ->
   tests = [
@@ -335,13 +322,7 @@ test 'AND', ->
     [0xFEED, 0x0F0F, 0x0E0D]
     [0x7BDC, 0xCCE3, 0x48C0]
   ]
-  for [a, b, result] in tests
-    [r1, r2, rd] = [14, 7, 0]
-    @registers[r1] = a
-    @registers[r2] = b
-    i = makeInstruction(9, r1, r2, rd)
-    @runOneInstruction i
-    equal @registers[rd], result, "#{a} AND #{b} = #{result}"
+  @testLogicOperation(9, 14, 7, 0, 'AND', tests)
 
 test 'ORR', ->
   tests = [
@@ -350,13 +331,7 @@ test 'ORR', ->
     [0xF000, 0x000F, 0xF00F]
     [0xC8C6, 0x3163, 0xF9E7]
   ]
-  for [a, b, result] in tests
-    [r1, r2, rd] = [13, 5, 3]
-    @registers[r1] = a
-    @registers[r2] = b
-    i = makeInstruction(10, r1, r2, rd)
-    @runOneInstruction i
-    equal @registers[rd], result, "#{a} OR #{b} = #{result}"
+  @testLogicOperation(0xA, 13, 5, 3, 'OR', tests)
 
 test 'XOR', ->
   tests = [
@@ -364,26 +339,15 @@ test 'XOR', ->
     [0xFF00, 0x00FF, 0xFFFF]
     [0x4955, 0x835A, 0xCA0F]
   ]
-  for [a, b, result] in tests
-    [r1, r2, rd] = [4, 6, 8]
-    @registers[r1] = a
-    @registers[r2] = b
-    i = makeInstruction(11, r1, r2, rd)
-    @runOneInstruction i
-    equal @registers[rd], result, "#{a} XOR #{b} = #{result}"
+  @testLogicOperation(0xB, 4, 6, 8, 'XOR', tests)
 
 test 'NOT', ->
   tests = [
-    [0x0000, 0xFFFF]
-    [0xFF00, 0x00FF]
-    [0x4955, 0xB6AA]
+    [0x0000, 0, 0xFFFF]
+    [0xFF00, 0, 0x00FF]
+    [0x4955, 0, 0xB6AA]
   ]
-  for [a, result] in tests
-    [r1, rd] = [9, 0]
-    @registers[r1] = a
-    i = makeInstruction(12, r1, 0, rd)
-    @runOneInstruction i
-    equal @registers[rd], result, "NOT #{a} = #{result}"
+  @testLogicOperation(0xC, 9, 0, 5, 'NOT', tests)
 
 test 'SHF', ->
   tests = [
@@ -405,8 +369,8 @@ test 'SHF', ->
     @runOneInstruction i
     sDirection = if direction then "right" else "left"
     equal @registers[rd],
-      result,
-      "SHF #{value} #{sDirection} by #{amount} = #{result}"
+          result,
+          "SHF #{value} #{sDirection} by #{amount} = #{result}"
     equal @cpu.carry, carry
 
 test 'BRN value', ->
