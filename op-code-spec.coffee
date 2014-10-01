@@ -173,9 +173,11 @@ module "cpu 16-bit",
         @runOneInstruction i
         equal @cpu.registers[register], finalValue
 
+    BINARY_PAIRS = [[0, 0], [0, 1], [1, 0], [1, 1]]
+
     @testAddSub = (opCode, symbol, tests, immediate = false) ->
       for [a, b, result, finalCarry, finalOverflow] in tests
-        for [initialCarry, initialOverflow] in BinaryPairs
+        for [initialCarry, initialOverflow] in BINARY_PAIRS
           [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
           @cpu.carry = initialCarry
           @cpu.overflow = initialOverflow
@@ -259,8 +261,6 @@ test 'STR', ->
     i = makeInstruction(4, addressRegister, valueRegister, 0)
     @runOneInstruction i
     equal @ram[address], value
-
-BinaryPairs = [[0, 0], [0, 1], [1, 0], [1, 1]]
 
 test 'ADD', ->
   tests = [
@@ -390,16 +390,7 @@ test 'BRN value', ->
     [0x7FFF, "NZ",  false]
     [0x7FFF, "NP",  true]
   ]
-  for [value, condString, takeJump] in tests
-    jumpAddr = 0x00FF
-    [r1, r2] = [12, 0]
-    @registers[r1] = value
-    @registers[r2] = jumpAddr
-    condCode = makeCondCode condString
-    i = makeInstruction(14, r1, r2, condCode)
-    @runOneInstruction i
-    finalPC = if takeJump then jumpAddr else 0x0001
-    equal @cpu.pc, finalPC, "#{value} #{condString} #{takeJump}"
+  runBranchTest(this, 'value', 12, 0, tests)
 
 test 'BRN flag', ->
   tests = [
@@ -419,19 +410,29 @@ test 'BRN flag', ->
     [1, 0, 'C', false]
     [1, 1, 'C', true]
   ]
-  for [overflow, carry, condString, takeJump] in tests
-    [r1, r2] = [11, 1]
+  runBranchTest(this, 'flag', 11, 1, tests)
+
+runBranchTest = (mod, mode, r1, r2, tests) ->
+  for test in tests
+    if mode == 'value'
+      [value, condString, takeJump] = test
+      mod.registers[r1] = value
+      messageHead = "#{value}"
+    else # mode is 'flag'
+      [overflow, carry, condString, takeJump] = test
+      mod.cpu.overflow = overflow
+      mod.cpu.carry = carry
+      messageHead = "#{overflow} #{carry}"
+    message = messageHead + " #{condString} #{takeJump}"
     jumpAddr = 0x00FF
-    @cpu.overflow = overflow
-    @cpu.carry = carry
-    @registers[r2] = jumpAddr
+    mod.registers[r2] = jumpAddr
     condCode = makeCondCode condString
     i = makeInstruction(14, r1, r2, condCode)
-    @runOneInstruction i
+    mod.runOneInstruction i
     finalPC = if takeJump then jumpAddr else 0x0001
-    equal @cpu.pc,
+    equal mod.cpu.pc,
           finalPC,
-          "#{overflow} #{carry} #{condString} #{takeJump}"
+          message
 
 test 'SPC', ->
   tests = [
