@@ -28,3 +28,4 @@
     - Split ISA from implementation
     - Have cpu file
       And separate computer file (MHz, register file porting, etc)
+- put specs in spec folder
