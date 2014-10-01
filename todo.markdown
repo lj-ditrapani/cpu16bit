@@ -5,7 +5,6 @@
     - hex
     - ASCII
 - Refactor
-    - change file type from dos to unix
     - Create new branch
     - refactor test
     - refactor code
