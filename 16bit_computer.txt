@@ -1,5 +1,4 @@
 ﻿---------|---------|---------|---------|---------|---------|---------|--
-http://jsfiddle.net/bL2eszp8/21
 
 General
 -------
@@ -30,14 +29,14 @@ Instruction Meaning
 2 LBY    Low byte
 3 LOD    Load
 4 STR    Store
-5 ADD    
-6 SUB    
+5 ADD
+6 SUB
 7 ADI    Add 4-bit immediate
 8 SBI    Subtract 4-bit immediate
-9 AND    
+9 AND
 A ORR    or
 B XOR    exclusive or
-C NOT    
+C NOT
 D SHF    Shift
 E BRN    Branch
 F SPC    Save PC
