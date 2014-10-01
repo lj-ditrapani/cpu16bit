@@ -76,6 +76,21 @@ test 'getShiftCarry', ->
   for [direction, amount, value, carry] in tests
     equal cpu16bit.getShiftCarry(value, direction, amount), carry
 
+test 'makeCondCode', ->
+  tests = [
+    ["NZP", 0b0111]
+    ["ZP", 0b0011]
+    ["Z", 0b0010]
+    ["P", 0b0001]
+    ["VC", 0b1011]
+    ["C", 0b1001]
+    ["V", 0b1010]
+    ["", 0b0000]
+    ["-", 0b1000]
+  ]
+  for [str, code] in tests
+    equal makeCondCode(str), code
+
 makeCondCode = (strCode) ->
   code = 0
   if ("V" in strCode) or ("C" in strCode) or ("-" in strCode)
@@ -92,21 +107,6 @@ makeCondCode = (strCode) ->
     if "P" in strCode
       code += 1
   code
-
-test 'makeCondCode', ->
-  tests = [
-    ["NZP", 0b0111]
-    ["ZP", 0b0011]
-    ["Z", 0b0010]
-    ["P", 0b0001]
-    ["VC", 0b1011]
-    ["C", 0b1001]
-    ["V", 0b1010]
-    ["", 0b0000]
-    ["-", 0b1000]
-  ]
-  for [str, code] in tests
-    equal makeCondCode(str), code
 
 test 'matchValue', ->
   tests = [
@@ -164,7 +164,7 @@ module "cpu 16-bit",
       @ram[pc] = instruction
       @cpu.step()
 
-    @testImmdLoad = (tests, opCode) ->
+    @testSetByteOperations = (tests, opCode) ->
       for [immediate, register, currentValue, finalValue] in tests
         @cpu.registers[register] = currentValue
         i = makeImmediate8Instruction(opCode, immediate, register)
@@ -222,7 +222,7 @@ test 'HBY', ->
     [0x00, 3, 0xFFFF, 0x00FF]
     [0xEA, 15, 0x1234, 0xEA34]
   ]
-  @testImmdLoad tests, 1
+  @testSetByteOperations tests, 1
 
 test 'LBY', ->
   tests = [
@@ -230,7 +230,7 @@ test 'LBY', ->
     [0, 3, 0xFFFF, 0xFF00]
     [0xEA, 15, 0x1234, 0x12EA]
   ]
-  @testImmdLoad tests, 2
+  @testSetByteOperations tests, 2
 
 test 'LOD', ->
   tests = [
@@ -375,19 +375,20 @@ test 'SHF', ->
 
 test 'BRN value', ->
   tests = [
-    [0xFFFF, 0x00FF, "",    false]
-    [0xFFFF, 0x00FF, "NZP", true]
-    [0xFFFF, 0x00FF, "ZP",  false]
-    [0xFFFF, 0x00FF, "N",   true]
-    [0x8000, 0x00FF, "N",   true]
-    [0x0000, 0x00FF, "NZ",  true]
-    [0x0000, 0x00FF, "NP",  false]
-    [0x0000, 0x00FF, "Z",   true]
-    [0x7FFF, 0x00FF, "P",   true]
-    [0x7FFF, 0x00FF, "NZ",  false]
-    [0x7FFF, 0x00FF, "NP",  true]
+    [0xFFFF, "",    false]
+    [0xFFFF, "NZP", true]
+    [0xFFFF, "ZP",  false]
+    [0xFFFF, "N",   true]
+    [0x8000, "N",   true]
+    [0x0000, "NZ",  true]
+    [0x0000, "NP",  false]
+    [0x0000, "Z",   true]
+    [0x7FFF, "P",   true]
+    [0x7FFF, "NZ",  false]
+    [0x7FFF, "NP",  true]
   ]
-  for [value, jumpAddr, condString, takeJump] in tests
+  for [value, condString, takeJump] in tests
+    jumpAddr = 0x00FF
     [r1, r2] = [12, 0]
     @registers[r1] = value
     @registers[r2] = jumpAddr
