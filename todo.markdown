@@ -5,7 +5,6 @@
     - hex
     - ASCII
 - Refactor
-    - Create new branch
     - refactor test
     - refactor code
     - tests:
