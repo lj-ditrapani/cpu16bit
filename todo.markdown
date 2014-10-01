@@ -5,16 +5,11 @@
     - hex
     - ASCII
 - Refactor
+    - change file type from dos to unix
     - Create new branch
     - refactor test
     - refactor code
     - tests:
-        - In module
-
-            @ram = @cpu.getRam()
-            @registers = @cpu.getRegisters()
-            so you don't have to type @cpu.registers ect
-
     - Use functions instead of raw ram/registers
         - cpu.getRam
         - cpu.getRegisters
