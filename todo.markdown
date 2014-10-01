@@ -20,7 +20,7 @@
         - setHexInput
         - getCharOutput
         - setCharInput
-- Split specs into seprate spec files (unit acceptance I/O video)
+- Split specs into separate spec files (unit acceptance I/O video)
 - Split readme into separate files
     - cpu
     - video
