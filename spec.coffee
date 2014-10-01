@@ -159,6 +159,18 @@ module "cpu 16-bit",
     @ram = @cpu.ram
     @registers = @cpu.registers
 
+    @runOneInstruction = (instruction, pc = 0) ->
+      @cpu.pc = pc
+      @ram[pc] = instruction
+      @cpu.step()
+
+    @testImmdLoad = (tests, opCode) ->
+      for [immediate, register, currentValue, finalValue] in tests
+        @cpu.registers[register] = currentValue
+        i = makeImmediate8Instruction(opCode, immediate, register)
+        @runOneInstruction i
+        equal @cpu.registers[register], finalValue
+
 test "Initial State", ->
   equal @ram.length, 65536, '65536 RAM cells'
   deepEqual [@ram[0], @ram[0xFFF9]], [0, 0],
@@ -169,14 +181,6 @@ test "Initial State", ->
   equal @cpu.opCodes.length, 16, '16 op codes'
   deepEqual @cpu.pc, 0, 'pc = 0'
   deepEqual [@cpu.carry, @cpu.overflow], [0, 0], 'flags'
-
-testImmdLoad = (cpu, tests, opCode) ->
-  for [immediate, register, currentValue, finalValue] in tests
-    cpu.pc = 0
-    cpu.registers[register] = currentValue
-    cpu.ram[0] = makeImmediate8Instruction(opCode, immediate, register)
-    cpu.step()
-    equal cpu.registers[register], finalValue
 
 test 'END', ->
   @ram[0] = 0
@@ -189,7 +193,7 @@ test 'HBY', ->
     [0x00, 3, 0xFFFF, 0x00FF]
     [0xEA, 15, 0x1234, 0xEA34]
   ]
-  testImmdLoad @cpu, tests, 1
+  @testImmdLoad tests, 1
 
 test 'LBY', ->
   tests = [
@@ -197,7 +201,7 @@ test 'LBY', ->
     [0, 3, 0xFFFF, 0xFF00]
     [0xEA, 15, 0x1234, 0x12EA]
   ]
-  testImmdLoad @cpu, tests, 2
+  @testImmdLoad tests, 2
 
 test 'LOD', ->
   tests = [
@@ -205,13 +209,10 @@ test 'LOD', ->
     [3, 10, 0x1000, 0xFACE]
   ]
   for [addressRegister, destRegister, address, value] in tests
-    @cpu.pc = 0
     @registers[addressRegister] = address
     @ram[address] = value
-    @ram[0] = makeInstruction(
-      3, addressRegister, 0, destRegister
-    )
-    @cpu.step()
+    i = makeInstruction(3, addressRegister, 0, destRegister)
+    @runOneInstruction i
     equal @registers[destRegister], value
 
 test 'STR', ->
@@ -221,11 +222,10 @@ test 'STR', ->
     [5, 5, 0x1000, 0x1000]
   ]
   for [addressRegister, valueRegister, address, value] in tests
-    @cpu.pc = 0
     @registers[addressRegister] = address
     @registers[valueRegister] = value
-    @ram[0] = makeInstruction(4, addressRegister, valueRegister, 0)
-    @cpu.step()
+    i = makeInstruction(4, addressRegister, valueRegister, 0)
+    @runOneInstruction i
     equal @ram[address], value
 
 BinaryPairs = [[0, 0], [0, 1], [1, 0], [1, 1]]
@@ -249,11 +249,10 @@ test 'ADD', ->
       [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
       @cpu.carry = initialCarry
       @cpu.overflow = initialOverflow
-      @cpu.pc = 0
       @registers[r1] = a
       @registers[r2] = b
-      @ram[0] = makeInstruction(5, r1, r2, rd)
-      @cpu.step()
+      i = makeInstruction(5, r1, r2, rd)
+      @runOneInstruction i
       equal @cpu.carry, finalCarry, "#{a} + #{b} = #{sum}"
       equal @cpu.overflow, finalOverflow
       equal @registers[rd], sum
@@ -277,11 +276,10 @@ test 'SUB', ->
       [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
       @cpu.carry = initialCarry
       @cpu.overflow = initialOverflow
-      @cpu.pc = 0
       @registers[r1] = a
       @registers[r2] = b
-      @ram[0] = makeInstruction(6, r1, r2, rd)
-      @cpu.step()
+      i = makeInstruction(6, r1, r2, rd)
+      @runOneInstruction i
       equal @cpu.carry, finalCarry, "Carry #{a} - #{b} = #{result}"
       equal @cpu.overflow, finalOverflow, "V"
       equal @registers[rd], result, "Result"
@@ -301,10 +299,9 @@ test 'ADI', ->
       [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
       @cpu.carry = initialCarry
       @cpu.overflow = initialOverflow
-      @cpu.pc = 0
       @registers[r1] = a
-      @ram[0] = makeInstruction(7, r1, b, rd)
-      @cpu.step()
+      i = makeInstruction(7, r1, b, rd)
+      @runOneInstruction i
       equal @cpu.carry, finalCarry, "#{a} + #{b} = #{sum}"
       equal @cpu.overflow, finalOverflow
       equal @registers[rd], sum
@@ -324,10 +321,9 @@ test 'SBI', ->
       [r1, r2, rd] = if initialCarry then [3, 4, 13] else [7, 11, 2]
       @cpu.carry = initialCarry
       @cpu.overflow = initialOverflow
-      @cpu.pc = 0
       @registers[r1] = a
-      @ram[0] = makeInstruction(8, r1, b, rd)
-      @cpu.step()
+      i = makeInstruction(8, r1, b, rd)
+      @runOneInstruction i
       equal @cpu.carry, finalCarry, "#{a} - #{b} = #{result}"
       equal @cpu.overflow, finalOverflow
       equal @registers[rd], result
@@ -341,11 +337,10 @@ test 'AND', ->
   ]
   for [a, b, result] in tests
     [r1, r2, rd] = [14, 7, 0]
-    @cpu.pc = 0
     @registers[r1] = a
     @registers[r2] = b
-    @ram[0] = makeInstruction(9, r1, r2, rd)
-    @cpu.step()
+    i = makeInstruction(9, r1, r2, rd)
+    @runOneInstruction i
     equal @registers[rd], result, "#{a} AND #{b} = #{result}"
 
 test 'ORR', ->
@@ -357,11 +352,10 @@ test 'ORR', ->
   ]
   for [a, b, result] in tests
     [r1, r2, rd] = [13, 5, 3]
-    @cpu.pc = 0
     @registers[r1] = a
     @registers[r2] = b
-    @ram[0] = makeInstruction(10, r1, r2, rd)
-    @cpu.step()
+    i = makeInstruction(10, r1, r2, rd)
+    @runOneInstruction i
     equal @registers[rd], result, "#{a} OR #{b} = #{result}"
 
 test 'XOR', ->
@@ -372,11 +366,10 @@ test 'XOR', ->
   ]
   for [a, b, result] in tests
     [r1, r2, rd] = [4, 6, 8]
-    @cpu.pc = 0
     @registers[r1] = a
     @registers[r2] = b
-    @ram[0] = makeInstruction(11, r1, r2, rd)
-    @cpu.step()
+    i = makeInstruction(11, r1, r2, rd)
+    @runOneInstruction i
     equal @registers[rd], result, "#{a} XOR #{b} = #{result}"
 
 test 'NOT', ->
@@ -387,10 +380,9 @@ test 'NOT', ->
   ]
   for [a, result] in tests
     [r1, rd] = [9, 0]
-    @cpu.pc = 0
     @registers[r1] = a
-    @ram[0] = makeInstruction(12, r1, 0, rd)
-    @cpu.step()
+    i = makeInstruction(12, r1, 0, rd)
+    @runOneInstruction i
     equal @registers[rd], result, "NOT #{a} = #{result}"
 
 test 'SHF', ->
@@ -406,12 +398,11 @@ test 'SHF', ->
   ]
   for [value, direction, amount, result, carry] in tests
     [r1, rd] = [14, 7]
-    @cpu.pc = 0
     @cpu.carry = 0
     @registers[r1] = value
     immd4 = direction * 8 + (amount - 1)
-    @ram[0] = makeInstruction(13, r1, immd4, rd)
-    @cpu.step()
+    i = makeInstruction(13, r1, immd4, rd)
+    @runOneInstruction i
     sDirection = if direction then "right" else "left"
     equal @registers[rd],
       result,
@@ -434,12 +425,11 @@ test 'BRN value', ->
   ]
   for [value, jumpAddr, condString, takeJump] in tests
     [r1, r2] = [12, 0]
-    @cpu.pc = 0
     @registers[r1] = value
     @registers[r2] = jumpAddr
     condCode = makeCondCode condString
-    @ram[0] = makeInstruction(14, r1, r2, condCode)
-    @cpu.step()
+    i = makeInstruction(14, r1, r2, condCode)
+    @runOneInstruction i
     finalPC = if takeJump then jumpAddr else 0x0001
     equal @cpu.pc, finalPC
 
@@ -464,13 +454,12 @@ test 'BRN flag', ->
   for [overflow, carry, condString, takeJump] in tests
     [r1, r2] = [11, 1]
     jumpAddr = 0x00FF
-    @cpu.pc = 0
     @cpu.overflow = overflow
     @cpu.carry = carry
     @registers[r2] = jumpAddr
     condCode = makeCondCode condString
-    @ram[0] = makeInstruction(14, r1, r2, condCode)
-    @cpu.step()
+    i = makeInstruction(14, r1, r2, condCode)
+    @runOneInstruction i
     finalPC = if takeJump then jumpAddr else 0x0001
     equal @cpu.pc,
           finalPC,
@@ -483,10 +472,9 @@ test 'SPC', ->
     [15, 0x0F00, 0x0F02]
   ]
   for [rd, pc, value] in tests
-    @cpu.pc = pc
     @registers[rd] = 0
-    @ram[pc] = makeInstruction(15, 0, 0, rd)
-    @cpu.step()
+    i = makeInstruction(15, 0, 0, rd)
+    @runOneInstruction(i, pc)
     equal @registers[rd], value, "#{rd} #{pc} #{value}"
 
 test 'Read from decimal debug input', ->
