@@ -1,1 +1,2 @@
-coffeelint spec.coffee cpu16bit.coffee
+coffeelint asm-programs-spec.coffee debug-io-spec.coffee \
+    op-code-spec.coffee cpu16bit.coffee
