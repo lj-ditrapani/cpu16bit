@@ -185,9 +185,10 @@ module "cpu 16-bit",
             r2
           i = makeInstruction(opCode, r1, thirdNibble, rd)
           @runOneInstruction i
-          equal @cpu.carry, finalCarry, "#{a} #{symbol} #{b} = #{result}"
-          equal @cpu.overflow, finalOverflow
-          equal @registers[rd], result, "Result"
+          message = "#{a} #{symbol} #{b} = #{result}"
+          equal @registers[rd], result, message
+          equal @cpu.carry, finalCarry, 'carry'
+          equal @cpu.overflow, finalOverflow, 'overflow'
 
     @testLogicOperation = (opCode, r1, r2, rd, name, tests) ->
       for [a, b, result] in tests
@@ -371,7 +372,7 @@ test 'SHF', ->
     equal @registers[rd],
           result,
           "SHF #{value} #{sDirection} by #{amount} = #{result}"
-    equal @cpu.carry, carry
+    equal @cpu.carry, carry, 'carry'
 
 test 'BRN value', ->
   tests = [
@@ -396,7 +397,7 @@ test 'BRN value', ->
     i = makeInstruction(14, r1, r2, condCode)
     @runOneInstruction i
     finalPC = if takeJump then jumpAddr else 0x0001
-    equal @cpu.pc, finalPC
+    equal @cpu.pc, finalPC, "#{value} #{condString} #{takeJump}"
 
 test 'BRN flag', ->
   tests = [
@@ -630,6 +631,6 @@ test 'Program with while loop', ->
   # -2 * 6060 = -12120
   # 16-bit hex(+12120) = 0x2F58
   # 16-bit hex(-12120) = 0xD0A8
-  deepEqual @ram[0xFFFC], []
-  deepEqual @ram[0xFFFD], [0xD0A8]
-  equal @cpu.pc, 15
+  deepEqual @ram[0xFFFC], [], 'Decimal input queue is empty'
+  deepEqual @ram[0xFFFD], [0xD0A8], "Outputs #{0xD0A8}"
+  equal @cpu.pc, 15, 'PC is 15'
