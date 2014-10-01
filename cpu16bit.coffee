@@ -209,12 +209,12 @@ class CPU
 
   ioRead: (address) ->
     if address == 0xFFFD
-        throw "Read from decimal debug output at PC #{@pc}"
+      throw new Error("Read from decimal debug output at PC #{@pc}")
     @ram[address].shift()
 
   ioWrite: (address, value) ->
     if address == 0xFFFC
-        throw "Write to decimal debug input at PC #{@pc}"
+      throw new Error("Write to decimal debug input at PC #{@pc}")
     @ram[address].push value
 
 

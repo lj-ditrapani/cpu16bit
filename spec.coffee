@@ -513,20 +513,20 @@ test 'Write to decimal debug output', ->
   deepEqual @cpu.ram[decOutputAddress], [value0, value1]
 
 test 'Attempt to write to decimal debug input', ->
-    pc = 2
-    @cpu.pc = pc
-    @cpu.registers[0] = 0xFFFC   # decimal debug input address
-    # STR R1 -> M[R0]            # write 0 to decimal debug input
-    @cpu.ram[pc] = 0x4010        # Attempt to write to input
-    throws (-> @cpu.step()), /Write to decimal debug input at PC 2/
+  pc = 2
+  @cpu.pc = pc
+  @cpu.registers[0] = 0xFFFC   # decimal debug input address
+  # STR R1 -> M[R0]            # write 0 to decimal debug input
+  @cpu.ram[pc] = 0x4010        # Attempt to write to input
+  throws (-> @cpu.step()), /Write to decimal debug input at PC 2/
 
 test 'Attempt to read from decimal debug output', ->
-    pc = 5
-    @cpu.pc = pc
-    @cpu.registers[0] = 0xFFFD   # decimal debug output address
-    # LOD M[R0] -> R1            # read from decimal debug output
-    @cpu.ram[pc] = 0x3001        # Attempt to read output
-    throws (-> @cpu.step()), /Read from decimal debug output at PC 5/
+  pc = 5
+  @cpu.pc = pc
+  @cpu.registers[0] = 0xFFFD   # decimal debug output address
+  # LOD M[R0] -> R1            # read from decimal debug output
+  @cpu.ram[pc] = 0x3001        # Attempt to read output
+  throws (-> @cpu.step()), /Read from decimal debug output at PC 5/
 
 test 'loadProgram', ->
   program = [
