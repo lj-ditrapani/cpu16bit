@@ -5,10 +5,13 @@ http://jsfiddle.net/bL2eszp8/
 ---------|---------|---------|---------|---------|---------|---------|--
 ###
 
+
 if (typeof ljd).toString() == 'undefined'
   window.ljd = {}
 
+
 END = 0
+
 
 getNibbles = (word) ->
   opCode = word >> 12
@@ -17,18 +20,23 @@ getNibbles = (word) ->
   c = word & 0xF
   [opCode, a, b, c]
 
+
 isPositiveOrZero = (word) ->
   (word >> 15) == 0
+
 
 isNegative = (word) ->
   (word >> 15) == 1
 
+
 isTruePositive = (word) ->
   isPositiveOrZero(word) and (word != 0)
-  
+
+
 hasOverflowedOnAdd = (a, b, sum) ->
   ((isNegative(a) and isNegative(b) and isPositiveOrZero(sum)) or
    (isPositiveOrZero(a) and isPositiveOrZero(b) and isNegative(sum)))
+
 
 positionOfLastBitShifted = (direction, amount) ->
   if direction == 'right'
@@ -36,13 +44,16 @@ positionOfLastBitShifted = (direction, amount) ->
   else
     16 - amount
 
+
 oneBitWordMask = (position) ->
   Math.pow(2, position)
+
 
 getShiftCarry = (value, direction, amount) ->
   position = positionOfLastBitShifted(direction, amount)
   mask = oneBitWordMask(position)
   if (value & mask) > 0 then 1 else 0
+
 
 matchValue = (value, cond) ->
   if ((cond & 0b100) == 0b100) and isNegative(value)
@@ -54,6 +65,7 @@ matchValue = (value, cond) ->
   else
     false
 
+
 matchFlags = (overflow, carry, cond) ->
   if (cond >= 2) and overflow
     true
@@ -63,6 +75,7 @@ matchFlags = (overflow, carry, cond) ->
     true
   else
     false
+
 
 class CPU
 
@@ -195,9 +208,13 @@ class CPU
     @registers[rd] = @pc + 2
 
   ioRead: (address) ->
+    if address == 0xFFFD
+        throw "Read from decimal debug output at PC #{@pc}"
     @ram[address].shift()
 
   ioWrite: (address, value) ->
+    if address == 0xFFFC
+        throw "Write to decimal debug input at PC #{@pc}"
     @ram[address].push value
 
 
