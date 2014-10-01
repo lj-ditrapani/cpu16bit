@@ -16,7 +16,7 @@ test 'makeImmediate8Instruction', ->
           instruction,
           name
 
-test 'makeImmediate8Instruction', ->
+test 'makeInstruction', ->
   tests = [
     [3, 0xF, 0x0, 0x2, 0x3F02, 'LOD']
     [4, 0xE, 0x2, 0x0, 0x4E20, 'STR']
