@@ -1,11 +1,6 @@
 ---------|---------|---------|---------|---------|---------|---------|--
 - Run coffeelint
-- Add basic debug I/O (hex, decimal, ASCII char streams)
-    - Exceptions for bad I/O (write to input, read output)
-    - hex
-    - ASCII
 - Refactor
-    - refactor test
     - refactor code
     - tests:
     - Use functions instead of raw ram/registers
@@ -27,3 +22,7 @@
     - Have cpu file
       And separate computer file (MHz, register file porting, etc)
 - put specs in spec folder
+- Add basic debug I/O (hex, decimal, ASCII char streams)
+    - Exceptions for bad I/O (write to input, read output)
+    - hex
+    - ASCII
