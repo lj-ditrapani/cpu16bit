@@ -1,6 +1,6 @@
 ###
 Author:  Lyall Jonathan Di Trapani
-Specification for 16 bit CPU simulator
+Tests to run complete machine language programs for 16 bit CPU simulator
 ---------|---------|---------|---------|---------|---------|---------|--
 ###
 
