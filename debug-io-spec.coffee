@@ -1,6 +1,6 @@
 ###
 Author:  Lyall Jonathan Di Trapani
-Specification for 16 bit CPU simulator
+Debug I/O Specification for 16 bit CPU simulator
 ---------|---------|---------|---------|---------|---------|---------|--
 ###
 
@@ -9,26 +9,33 @@ cpu16bit = ljd.cpu16bit
 test 'Read from decimal debug input', ->
   addressRegister = 0xC
   decInputAddress = 0xFFFC
-  @ram[decInputAddress] = [42, 24, 7]
+  @ram[decInputAddress] = [42, 64, 7]
   @registers[addressRegister] = decInputAddress
   @ram[0] = @makeInstruction(3, addressRegister, 0, 0x0)
   @ram[1] = @makeInstruction(3, addressRegister, 0, 0x1)
   @cpu.run()
   deepEqual @ram[decInputAddress], [7]
-  deepEqual [@registers[0], @registers[1]], [42, 24]
+  deepEqual [@registers[0], @registers[1]], [42, 64]
+
+runDebugOutputTest = (mod, outputAddress, output0, output1) ->
+  addressRegister = 0xA
+  [value0, value1] = [42, 64]
+  mod.registers[0x0] = value0
+  mod.registers[0x1] = value1
+  mod.registers[addressRegister] = outputAddress
+  mod.ram[0] = mod.makeInstruction(4, addressRegister, 0x0, 0)
+  mod.ram[1] = mod.makeInstruction(4, addressRegister, 0x1, 0)
+  mod.cpu.run()
+  deepEqual mod.ram[outputAddress], [output0, output1]
+
+test 'Write to hexadecimal debug output', ->
+  runDebugOutputTest(this, 0xFFFB, '$2A', '$40')
 
 test 'Write to decimal debug output', ->
-  addressRegister = 0xA
-  decOutputAddress = 0xFFFD
-  value0 = 42
-  value1 = 24
-  @registers[0x0] = value0
-  @registers[0x1] = value1
-  @registers[addressRegister] = decOutputAddress
-  @ram[0] = @makeInstruction(4, addressRegister, 0x0, 0)
-  @ram[1] = @makeInstruction(4, addressRegister, 0x1, 0)
-  @cpu.run()
-  deepEqual @ram[decOutputAddress], [value0, value1]
+  runDebugOutputTest(this, 0xFFFD, 42, 64)
+
+test 'Write to ASCII char debug output', ->
+  runDebugOutputTest(this, 0xFFFF, '*', '@')
 
 test 'Attempt to write to decimal debug input', ->
   pc = 2
