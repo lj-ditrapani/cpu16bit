@@ -376,6 +376,28 @@ test 'SHF', ->
           "SHF #{value} #{sDirection} by #{amount} = #{result}"
     equal @cpu.carry, carry, 'carry'
 
+runBranchTest = (mod, mode, r1, r2, tests) ->
+  for test in tests
+    if mode == 'value'
+      [value, condString, takeJump] = test
+      mod.registers[r1] = value
+      messageHead = "#{value}"
+    else # mode is 'flag'
+      [overflow, carry, condString, takeJump] = test
+      mod.cpu.overflow = overflow
+      mod.cpu.carry = carry
+      messageHead = "#{overflow} #{carry}"
+    message = messageHead + " #{condString} #{takeJump}"
+    jumpAddr = 0x00FF
+    mod.registers[r2] = jumpAddr
+    condCode = makeCondCode condString
+    i = makeInstruction(14, r1, r2, condCode)
+    mod.runOneInstruction i
+    finalPC = if takeJump then jumpAddr else 0x0001
+    equal mod.cpu.pc,
+          finalPC,
+          message
+
 test 'BRN value', ->
   tests = [
     [0xFFFF, "",    false]
@@ -411,28 +433,6 @@ test 'BRN flag', ->
     [1, 1, 'C', true]
   ]
   runBranchTest(this, 'flag', 11, 1, tests)
-
-runBranchTest = (mod, mode, r1, r2, tests) ->
-  for test in tests
-    if mode == 'value'
-      [value, condString, takeJump] = test
-      mod.registers[r1] = value
-      messageHead = "#{value}"
-    else # mode is 'flag'
-      [overflow, carry, condString, takeJump] = test
-      mod.cpu.overflow = overflow
-      mod.cpu.carry = carry
-      messageHead = "#{overflow} #{carry}"
-    message = messageHead + " #{condString} #{takeJump}"
-    jumpAddr = 0x00FF
-    mod.registers[r2] = jumpAddr
-    condCode = makeCondCode condString
-    i = makeInstruction(14, r1, r2, condCode)
-    mod.runOneInstruction i
-    finalPC = if takeJump then jumpAddr else 0x0001
-    equal mod.cpu.pc,
-          finalPC,
-          message
 
 test 'SPC', ->
   tests = [
