@@ -1,7 +1,6 @@
 ###
 Author:  Lyall Jonathan Di Trapani
 16 bit CPU simulator
-http://jsfiddle.net/bL2eszp8/
 ---------|---------|---------|---------|---------|---------|---------|--
 ###
 
