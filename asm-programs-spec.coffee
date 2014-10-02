@@ -1,6 +1,6 @@
 ###
 Author:  Lyall Jonathan Di Trapani
-Specification for 16 bit CPU simulator
+Op-code Specification for 16 bit CPU simulator
 ---------|---------|---------|---------|---------|---------|---------|--
 ###
 
