@@ -55,7 +55,7 @@ Instruction operation
     F SPC    PC + 2 -> RD
 
 
-*SHF*  Shift, zero fill
+**SHF**  Shift, zero fill
 
     Carry contains bit of last bit shifted out
     immd4 format
@@ -68,7 +68,7 @@ Instruction operation
     SHF R7 R 7 R0 ->  $D7E0
 
 
-*BRN* M---
+**BRN** M---
 
     M is mode
     0NZP    0 is value mode (negative zero positive)
