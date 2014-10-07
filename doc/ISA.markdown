@@ -45,7 +45,7 @@ Instruction operation
     F SPC    PC + 2 -> RD
 
 
-### SHF ### 
+### SHF ###
 
 Shift, zero fill
 
