@@ -2,7 +2,7 @@
 - Run coffeelint
 - Refactor
     - refactor code
-Improve ISA file
+- Improve ISA file
 
 
 Considerations
