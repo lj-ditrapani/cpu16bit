@@ -2,27 +2,15 @@
 - Run coffeelint
 - Refactor
     - refactor code
-    - tests:
-    - Use functions instead of raw ram/registers
-        - cpu.getRam
-        - cpu.getRegisters
-    - I/O Use functions instead of raw addresses
-        - getDecimalOutput
-        - setDecimalInput
-        - getHexOutput
-        - setHexInput
-        - getCharOutput
-        - setCharInput
-- Split readme into separate files
-    - cpu
-    - video
-    - I/O
-- Readme file
-    - Split ISA from implementation
-    - Have cpu file
-      And separate computer file (MHz, register file porting, etc)
-- put specs in spec folder
-- Add basic debug I/O (hex, decimal, ASCII char streams)
-    - Exceptions for bad I/O (write to input, read output)
-    - hex
-    - ASCII
+- Change name of decimal I/O to debug I/O
+
+
+Considerations
+--------------
+- Use functions instead of raw ram/registers
+    - cpu.getRam
+    - cpu.getRegisters
+- I/O Use functions instead of raw addresses
+    - getDebugOutput
+    - setDebugInput
+- Do not use a hex or char debug I/O; only decimal
