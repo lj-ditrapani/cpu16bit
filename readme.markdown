@@ -14,6 +14,6 @@ Design:
 - 16 instructions (4-bit op-code)
 
 The processor instruction set architecture (ISA) can be found in
-[doc/cpu16bit.markdown](doc/cpu16bit.markdown).
+[doc/ISA.markdown](doc/ISA.markdown).
 
 Author:  Lyall Jonathan Di Trapani
