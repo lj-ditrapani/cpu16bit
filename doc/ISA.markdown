@@ -1,16 +1,6 @@
 ﻿<!-- ====|=========|=========|=========|=========|=========|======== -->
-
-General
--------
-
-- 16-bit CPU
-- 16 X 16-bit registers and program counter (PC)
-- 2^16 = 65,536 memory addresses (16-bit resolution)
-- 16-bit memory cells
-- A word is 16 bits (2 bytes)
-- 64 KWords = 128 KB = 1 M-bit
-- All instructions are 16 bits long
-- 16 instructions (4-bit op-code)
+ISA
+===
 
 
 Instruction Meaning
@@ -55,7 +45,9 @@ Instruction operation
     F SPC    PC + 2 -> RD
 
 
-**SHF**  Shift, zero fill
+### SHF ### 
+
+Shift, zero fill
 
     Carry contains bit of last bit shifted out
     immd4 format
@@ -68,7 +60,9 @@ Instruction operation
     SHF R7 R 7 R0 ->  $D7E0
 
 
-**BRN** M---
+### BRN ###
+
+M---
 
     M is mode
     0NZP    0 is value mode (negative zero positive)
