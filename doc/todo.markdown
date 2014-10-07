@@ -2,7 +2,6 @@
 - Run coffeelint
 - Refactor
     - refactor code
-- Change name of decimal I/O to debug I/O
 
 
 Considerations
@@ -13,4 +12,4 @@ Considerations
 - I/O Use functions instead of raw addresses
     - getDebugOutput
     - setDebugInput
-- Do not use a hex or char debug I/O; only decimal
+- Remove debug I/O?
