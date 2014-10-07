@@ -6,9 +6,9 @@ Debug I/O Specification for 16 bit CPU simulator
 
 cpu16bit = ljd.cpu16bit
 
-test 'Read from decimal debug input', ->
+test 'Read from debug input', ->
   addressRegister = 0xC
-  decInputAddress = 0xFFFC
+  decInputAddress = 0xFFFE
   @ram[decInputAddress] = [42, 64, 7]
   @registers[addressRegister] = decInputAddress
   @ram[0] = @makeInstruction(3, addressRegister, 0, 0x0)
@@ -28,27 +28,21 @@ runDebugOutputTest = (mod, outputAddress, output0, output1) ->
   mod.cpu.run()
   deepEqual mod.ram[outputAddress], [output0, output1]
 
-test 'Write to hexadecimal debug output', ->
-  runDebugOutputTest(this, 0xFFFB, '$2A', '$40')
+test 'Write to debug output', ->
+  runDebugOutputTest(this, 0xFFFF, 42, 64)
 
-test 'Write to decimal debug output', ->
-  runDebugOutputTest(this, 0xFFFD, 42, 64)
-
-test 'Write to ASCII char debug output', ->
-  runDebugOutputTest(this, 0xFFFF, '*', '@')
-
-test 'Attempt to write to decimal debug input', ->
+test 'Attempt to write to debug input', ->
   pc = 2
   @cpu.pc = pc
-  @registers[0] = 0xFFFC   # decimal debug input address
-  # STR R1 -> M[R0]            # write 0 to decimal debug input
+  @registers[0] = 0xFFFE   # debug input address
+  # STR R1 -> M[R0]        # write 0 to debug input
   @ram[pc] = 0x4010        # Attempt to write to input
-  throws (-> @cpu.step()), /Write to decimal debug input at PC 2/
+  throws (-> @cpu.step()), /Write to debug input at PC 2/
 
-test 'Attempt to read from decimal debug output', ->
+test 'Attempt to read from debug output', ->
   pc = 5
   @cpu.pc = pc
-  @registers[0] = 0xFFFD   # decimal debug output address
-  # LOD M[R0] -> R1            # read from decimal debug output
+  @registers[0] = 0xFFFF   # debug output address
+  # LOD M[R0] -> R1        # read from debug output
   @ram[pc] = 0x3001        # Attempt to read output
-  throws (-> @cpu.step()), /Read from decimal debug output at PC 5/
+  throws (-> @cpu.step()), /Read from debug output at PC 5/

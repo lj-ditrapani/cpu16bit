@@ -132,7 +132,7 @@ class CPU
 
   LOD: (ra, _, rd) ->
     address = @registers[ra]
-    @registers[rd] = if address >= 0xFFFA
+    @registers[rd] = if address >= 0xFFFE
       @ioRead(address)
     else
       @ram[address]
@@ -141,7 +141,7 @@ class CPU
     console.log(ra, r2)
     address = @registers[ra]
     value = @registers[r2]
-    if address >= 0xFFFA
+    if address >= 0xFFFE
       @ioWrite(address, value)
     else
       @ram[address] = value
@@ -207,13 +207,13 @@ class CPU
     @registers[rd] = @pc + 2
 
   ioRead: (address) ->
-    if address == 0xFFFD
-      throw new Error("Read from decimal debug output at PC #{@pc}")
+    if address == 0xFFFF
+      throw new Error("Read from debug output at PC #{@pc}")
     @ram[address].shift()
 
   ioWrite: (address, value) ->
-    if address == 0xFFFC
-      throw new Error("Write to decimal debug input at PC #{@pc}")
+    if address == 0xFFFE
+      throw new Error("Write to debug input at PC #{@pc}")
     @ram[address].push value
 
 

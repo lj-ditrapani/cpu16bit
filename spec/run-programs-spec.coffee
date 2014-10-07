@@ -110,17 +110,17 @@ test 'branching program', ->
 
 test 'Program with while loop', ->
   # Run a complete program
-  # Uses decimal I/O ports
+  # Uses debug I/O ports
   # Input: n followed by a list of n integers
   # Output: -2 * sum(list of n integers)
   program = [
     # R0 gets input address
     0x1FF0      # 0 HBY 0xFF R0       0xFF -> Upper(R0)
-    0x2FC0      # 1 LBY 0xFC R0       0xFC -> Lower(R0)
+    0x2FE0      # 1 LBY 0xFE R0       0xFE -> Lower(R0)
 
     # R1 gets output address
     0x1FF1      # 2 HBY 0xFF R1       0xFF -> Upper(R1)
-    0x2FD1      # 3 LBY 0xFD R1       0xFD -> Lower(R1)
+    0x2FF1      # 3 LBY 0xFF R1       0xFF -> Lower(R1)
 
     # R2 gets n, the count of how many input values to sum
     0x3002      # 4 LOD R0 R2         First Input (count n) -> R2
@@ -146,7 +146,7 @@ test 'Program with while loop', ->
     0x4170      # E STR R1 R7         Output value of R7
     0x0000      # F END
   ]
-  @ram[0xFFFC] = [101].concat [10..110]
+  @ram[0xFFFE] = [101].concat [10..110]
   @cpu.loadProgram program
   @cpu.run()
   # n = length(10..110) = 101
@@ -154,6 +154,6 @@ test 'Program with while loop', ->
   # -2 * 6060 = -12120
   # 16-bit hex(+12120) = 0x2F58
   # 16-bit hex(-12120) = 0xD0A8
-  deepEqual @ram[0xFFFC], [], 'Decimal input queue is empty'
-  deepEqual @ram[0xFFFD], [0xD0A8], "Outputs #{0xD0A8}"
+  deepEqual @ram[0xFFFE], [], 'Debug input queue is empty'
+  deepEqual @ram[0xFFFF], [0xD0A8], "Outputs #{0xD0A8}"
   equal @cpu.pc, 15, 'PC is 15'
