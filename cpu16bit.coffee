@@ -138,7 +138,6 @@ class CPU
       @ram[address]
 
   STR: (ra, r2, _) ->
-    console.log(ra, r2)
     address = @registers[ra]
     value = @registers[r2]
     if address >= 0xFFFE
