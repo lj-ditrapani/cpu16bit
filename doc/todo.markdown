@@ -1,5 +1,6 @@
 <!-- ====|=========|=========|=========|=========|=========|======== -->
 - Run coffeelint
+- Remove debug I/O; use output I/O space instead (video or storge out)
 - Refactor
     - refactor code
 - Improve ISA file
