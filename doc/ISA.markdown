@@ -1,6 +1,6 @@
 <!-- Author:  Lyall Jonathan Di Trapani =========|=========|======== -->
-Instruction Set Architecture ISA
-================================
+Instruction Set Architecture (ISA)
+==================================
 
 
 Instruction Meaning
