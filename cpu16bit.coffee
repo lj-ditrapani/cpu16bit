@@ -87,8 +87,6 @@ class CPU
     @pc = 0
     @registers = (0 for _ in [0...16])
     @ram = (0 for _ in [0...Math.pow(2, 16)])
-    for i in [0xFFFA..0xFFFF]
-      @ram[i] = []
     @carry = 0
     @overflow = 0
 
@@ -132,18 +130,12 @@ class CPU
 
   LOD: (ra, _, rd) ->
     address = @registers[ra]
-    @registers[rd] = if address >= 0xFFFE
-      @ioRead(address)
-    else
-      @ram[address]
+    @registers[rd] = @ram[address]
 
   STR: (ra, r2, _) ->
     address = @registers[ra]
     value = @registers[r2]
-    if address >= 0xFFFE
-      @ioWrite(address, value)
-    else
-      @ram[address] = value
+    @ram[address] = value
 
   ADD: (r1, r2, rd) ->
     [a, b] = [@registers[r1], @registers[r2]]
@@ -204,16 +196,6 @@ class CPU
 
   SPC: (_, __, rd) ->
     @registers[rd] = @pc + 2
-
-  ioRead: (address) ->
-    if address == 0xFFFF
-      throw new Error("Read from debug output at PC #{@pc}")
-    @ram[address].shift()
-
-  ioWrite: (address, value) ->
-    if address == 0xFFFE
-      throw new Error("Write to debug input at PC #{@pc}")
-    @ram[address].push value
 
 
 ljd.cpu16bit =
