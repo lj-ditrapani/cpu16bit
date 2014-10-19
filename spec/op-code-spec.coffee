@@ -209,8 +209,6 @@ test "Initial State", ->
   equal @ram.length, 65536, '65536 RAM cells'
   deepEqual [@ram[0], @ram[0xFFF9]], [0, 0],
             'RAM init to all 0'
-  deepEqual [@ram[0xFFFA], @ram[0xFFFF]], [[], []],
-            'Last 6 RAM addresses are buffers'
   equal @registers.length, 16, '16 registers'
   equal @cpu.opCodes.length, 16, '16 op codes'
   deepEqual @cpu.pc, 0, 'pc = 0'
