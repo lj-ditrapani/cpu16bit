@@ -56,8 +56,8 @@ Shift, zero fill
     AAA is (amount - 1)
     0-7  ->  1-8
     Assembly:
-    SHF R3 L 2 RA ->  $D31A
-    SHF R7 R 7 R0 ->  $D7E0
+    SHF R7 L 2 RA ->  $D71A
+    SHF R5 R 7 R0 ->  $D5E0
 
 
 ### BRN ###
@@ -70,7 +70,6 @@ M---
     0111    unconditional jump (jump if value is Neg, Zero or Positive
     0000    never jump (no operation; NOP)
     1000    jump if carry and overflow are *NOT* set (ignore value)
-    1011    jump if carry or overflow are set (probably useless)
     1010    jump if overflow set (don't care about carry)
     1001    jump if carry set (don't care about overflow)
 
@@ -78,7 +77,6 @@ Because you want to handle a carry or overflow situations differently
 You may be interested in ensuring NO exceptions (1000). You probably
 wouldn't know what to do if both exceptions happened;
 just handle each separately
-BRN 1011 is probably not useful.
 
 
 Instruction format
