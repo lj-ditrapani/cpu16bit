@@ -1,6 +1,8 @@
 LJD 16-bit processor
 ====================
 
+This is the old design.  For the new design, see <https://github.com/lj-ditrapani/16-bit-computer-specification>.
+
 Design:
 -------
 
